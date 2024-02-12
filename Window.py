@@ -15,7 +15,7 @@ class MainWindow:
         position_y = int((screen_height - window_height) / 2)
 
         self.root.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
-        self.root.title("Main Window")
+        self.root.title("Credentials Cacher")
 
         self.setup_ui(window_width, window_height)
 
