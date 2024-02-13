@@ -34,8 +34,8 @@ class LoginWindow:
 
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        init_width = int(screen_width * 0.5)
-        init_height = int(screen_height * 0.5)
+        init_width = int(screen_width * 0.6)
+        init_height = int(screen_height * 0.2)
 
         position_x = int((screen_width - init_width) / 2)
         position_y = int((screen_height - init_height) / 2)
