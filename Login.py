@@ -5,9 +5,9 @@ from placeholder_entry import PlaceholderEntry
 class LoginFrame(tk.Frame):
     def __init__(self, master, on_show_other_frame):
         super().__init__(master)
+        self.on_show_other_frame = on_show_other_frame
         self.grid(row=0, column=0, sticky='nsew')
         self.create_widgets()
-        self.on_show_other_frame = on_show_other_frame
 
     def create_widgets(self):
         self.username_entry = PlaceholderEntry(self, placeholder="Username")
