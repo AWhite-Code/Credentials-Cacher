@@ -21,7 +21,7 @@ class LoginFrame(tk.Frame):
         self.master.geometry(f"{self.window_width}x{self.window_height}")
 
         # Define maximum widths for widgets based on a percentage of the window's width
-        self.max_text_field_width = self.window_width * 0.5
+        self.max_text_field_width = self.window_width * 0.2
         self.max_button_width = self.window_width * 0.4
 
         self.create_widgets()
@@ -36,6 +36,16 @@ class LoginFrame(tk.Frame):
         # Calculate the desired width for the text fields and button
         text_field_width = window_width * 0.5
         button_width = window_width * 0.4
+        
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
 
         # Create the username and password entries
         self.username_entry = PlaceholderEntry(self, placeholder="Username...")
