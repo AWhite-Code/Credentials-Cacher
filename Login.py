@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
+# This will 
 class PlaceholderEntry(tk.Entry):
     def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey', **kwargs):
         super().__init__(master, **kwargs)
@@ -30,11 +31,11 @@ class PlaceholderEntry(tk.Entry):
 class LoginWindow:
     def __init__(self, root):
         self.root = root
-        self.root.title("Login")
+        self.root.title("Credentials Cacher")
 
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        init_width = int(screen_width * 0.6)
+        init_width = int(screen_width * 0.4)
         init_height = int(screen_height * 0.2)
 
         position_x = int((screen_width - init_width) / 2)
@@ -53,11 +54,11 @@ class LoginWindow:
         self.root.grid_columnconfigure(2, weight=1)
 
         # Username Entry with inline label
-        self.username_entry = PlaceholderEntry(self.root, placeholder="Username *")
+        self.username_entry = PlaceholderEntry(self.root, placeholder="Username")
         self.username_entry.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
         # Password Entry with inline label
-        self.password_entry = PlaceholderEntry(self.root, placeholder="Password *", show="*")
+        self.password_entry = PlaceholderEntry(self.root, placeholder="Password", show="*")
         self.password_entry.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
 
         # Login Button with proportional width
