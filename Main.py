@@ -1,9 +1,9 @@
 import tkinter as tk
-from Login import LoginWindow
+from Window import MainWindow
 
 def main():
     root = tk.Tk()
-    app = LoginWindow(root)
+    app = MainWindow(root)
     root.mainloop()
 
 if __name__ == "__main__":
