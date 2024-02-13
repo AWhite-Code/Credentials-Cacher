@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
-# This will 
+# This is the baseline for an updated button type that displays the buttons purpose as rewritable text.
 class PlaceholderEntry(tk.Entry):
     def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey', **kwargs):
         super().__init__(master, **kwargs)
