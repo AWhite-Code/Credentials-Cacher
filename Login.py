@@ -13,7 +13,7 @@ class LoginFrame(tk.Frame):
         self.master.columnconfigure(0, weight=1)
 
         # Set minsize
-        self.master.minsize(300, 150)
+        self.master.minsize(300, 450)
 
         # Scale the window based on screen size
         self.window_width = int(self.master.winfo_screenwidth() * 0.3)
@@ -46,29 +46,35 @@ class LoginFrame(tk.Frame):
         self.rowconfigure(2, weight=1)
         self.rowconfigure(3, weight=1)
         self.rowconfigure(4, weight=1)
+        self.rowconfigure(5, weight=1)
+        self.rowconfigure(6, weight=1)
+        self.rowconfigure(7, weight=1)
+        
+        title_label = tk.Label(self, text="Credential Cacher", font=("Helvetica", 24, "bold"))
+        title_label.grid(row=1, column=0, columnspan=3, pady=(10, 20), sticky='nsew')
 
         # Create the username and password entries
         self.username_entry = PlaceholderEntry(self, placeholder="Username...")
-        self.username_entry.grid(row=0, column=0, columnspan=3, padx=20, pady=(20, 10))
+        self.username_entry.grid(row=3, column=0, columnspan=3, padx=20, pady=(20, 10))
         self.username_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
 
         self.password_entry = PlaceholderEntry(self, placeholder="Password...", show="*")
-        self.password_entry.grid(row=1, column=0, columnspan=3, padx=20, pady=10)
+        self.password_entry.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
         self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
 
         # Create a remember username checkbox
         self.remember_var = tk.BooleanVar()
         self.remember_check = tk.Checkbutton(self, text="Remember Username", variable=self.remember_var)
-        self.remember_check.grid(row=2, column=0, columnspan=3, padx=20, pady=10)
+        self.remember_check.grid(row=5, column=0, columnspan=3, padx=20, pady=10)
 
         # Create the login button
         self.login_button = tk.Button(self, text="Login", command=self.login_action)
-        self.login_button.grid(row=3, column=0, columnspan=3, padx=20, pady=(10, 20))
+        self.login_button.grid(row=6, column=0, columnspan=3, padx=20, pady=(10, 20))
         self.login_button.config(width=int(min(button_width, self.max_button_width)))
 
         # Create the switch to registration button in the lower left corner
         self.switch_button = tk.Button(self, text="Switch to Registration", command=self.on_show_other_frame)
-        self.switch_button.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
+        self.switch_button.grid(row=7, column=0, columnspan=3, padx=20, pady=10)
 
     def login_action(self):
         username = self.username_entry.get()
