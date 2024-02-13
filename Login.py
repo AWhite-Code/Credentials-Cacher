@@ -16,13 +16,13 @@ class LoginFrame(tk.Frame):
         self.master.minsize(300, 150)
 
         # Scale the window based on screen size
-        self.window_width = int(self.master.winfo_screenwidth() * 0.4)
+        self.window_width = int(self.master.winfo_screenwidth() * 0.3)
         self.window_height = int(self.master.winfo_screenheight() * 0.25)
         self.master.geometry(f"{self.window_width}x{self.window_height}")
 
         # Define maximum widths for widgets based on a percentage of the window's width
-        self.max_text_field_width = self.window_width * 0.2
-        self.max_button_width = self.window_width * 0.4
+        self.max_text_field_width = self.window_width * 0.1
+        self.max_button_width = self.window_width * 0.1
 
         self.create_widgets()
 
@@ -38,7 +38,7 @@ class LoginFrame(tk.Frame):
         button_width = window_width * 0.4
         
         self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(1, weight=3)
         self.columnconfigure(2, weight=1)
         
         self.rowconfigure(0, weight=1)
@@ -59,7 +59,7 @@ class LoginFrame(tk.Frame):
         # Create a remember username checkbox
         self.remember_var = tk.BooleanVar()
         self.remember_check = tk.Checkbutton(self, text="Remember Username", variable=self.remember_var)
-        self.remember_check.grid(row=2, column=0, padx=20, pady=10, sticky='w')
+        self.remember_check.grid(row=2, column=0, columnspan=3, padx=20, pady=10)
 
         # Create the login button
         self.login_button = tk.Button(self, text="Login", command=self.login_action)
@@ -68,7 +68,7 @@ class LoginFrame(tk.Frame):
 
         # Create the switch to registration button in the lower left corner
         self.switch_button = tk.Button(self, text="Switch to Registration", command=self.on_show_other_frame)
-        self.switch_button.grid(row=4, column=0, padx=20, pady=10, sticky='sw')
+        self.switch_button.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
 
     def login_action(self):
         username = self.username_entry.get()
