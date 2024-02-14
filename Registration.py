@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from placeholder_entry import PlaceholderEntry
+import re
+import pickle
 
 class RegistrationFrame(tk.Frame):
     def __init__(self, master, on_show_other_frame):
@@ -11,9 +13,6 @@ class RegistrationFrame(tk.Frame):
         self.grid(row=0, column=0, sticky='nsew')
         self.master.rowconfigure(0, weight=1)
         self.master.columnconfigure(0, weight=1)
-
-        # Set minsize
-        self.master.minsize(300, 450)
 
         # Scale the window based on screen size
         self.window_width = int(self.master.winfo_screenwidth() * 0.3)
@@ -27,9 +26,11 @@ class RegistrationFrame(tk.Frame):
 
     def create_widgets(self):
         # Configure the grid layout
+        
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
         self.columnconfigure(2, weight=1)
+        
         
         for i in range(8):
             self.rowconfigure(i, weight=1)
@@ -60,10 +61,47 @@ class RegistrationFrame(tk.Frame):
         self.switch_button = tk.Button(self, text="Switch to Login", command=self.on_show_other_frame)
         self.switch_button.grid(row=7, column=0, columnspan=3, padx=20, pady=0)
 
-    def register_action(self):
-        # Perform registration logic here
-        pass
-
     def on_resize(self, event):
-        # Resizing logic, similar to login frame
-        pass
+        # Calculate the new widths based on the new window size
+        text_field_width = event.width * 0.5
+        button_width = event.width * 0.4
+
+        # Update the width of the text fields and button
+        self.username_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
+        self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
+        self.confirm_password_entry(width=int(min(text_field_width, self.max_text_field_width)))
+        self.login_button.config(width=int(min(button_width, self.max_button_width)))
+        
+    def register_action(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        confirm_password = self.confirm_password_entry.get()
+
+        # Check if the password meets the requirements
+        if not self.validate_password(password):
+            messagebox.showerror("Registration Failed", "Password does not meet the requirements.")
+            return
+
+        # Check if passwords match
+        if password != confirm_password:
+            messagebox.showerror("Registration Failed", "Passwords do not match.")
+            return
+
+        # Save the username and password to a binary file
+        self.save_credentials(username, password)
+        messagebox.showinfo("Registration Success", "You have registered successfully.")
+
+    def validate_password(self, password):
+        # Define the password requirements here
+        if len(password) < 8:
+            return False
+        if not re.search("[0-9]", password):
+            return False
+        if not re.search("[!@#$%^&*(),.?\":{}|<>]", password):
+            return False
+        return True
+
+    def save_credentials(self, username, password):
+        credentials = {'username': username, 'password': password}
+        with open('credentials.bin', 'wb') as file:
+            pickle.dump(credentials, file)

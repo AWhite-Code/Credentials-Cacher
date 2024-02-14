@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from placeholder_entry import PlaceholderEntry
+import pickle
 
 class LoginFrame(tk.Frame):
     def __init__(self, master, on_show_other_frame):
@@ -13,7 +14,8 @@ class LoginFrame(tk.Frame):
         self.master.columnconfigure(0, weight=1)
 
         # Set minsize
-        self.master.minsize(300, 450)
+        self.master.minsize(450, 450)
+        self.master.maxsize(1000,700)
 
         # Scale the window based on screen size
         self.window_width = int(self.master.winfo_screenwidth() * 0.3)
@@ -41,14 +43,8 @@ class LoginFrame(tk.Frame):
         self.columnconfigure(1, weight=3)
         self.columnconfigure(2, weight=1)
         
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=1)
-        self.rowconfigure(4, weight=1)
-        self.rowconfigure(5, weight=1)
-        self.rowconfigure(6, weight=1)
-        self.rowconfigure(7, weight=1)
+        for i in range(7):
+            self.rowconfigure(i, weight=1)
         
         title_label = tk.Label(self, text="Credential Cacher", font=("Helvetica", 24, "bold"))
         title_label.grid(row=1, column=0, columnspan=3, pady=(10, 20), sticky='nsew')
@@ -75,14 +71,6 @@ class LoginFrame(tk.Frame):
         # Create the switch to registration button in the lower left corner
         self.switch_button = tk.Button(self, text="Switch to Registration", command=self.on_show_other_frame)
         self.switch_button.grid(row=7, column=0, columnspan=3, padx=20, pady=10)
-
-    def login_action(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-        if username == "Username..." or password == "Password...":
-            messagebox.showinfo("Login Failed", "Please enter your username and password.")
-        else:
-            messagebox.showinfo("Login info", f"Username: {username}, Password: {password}")
             
     def on_resize(self, event):
         # Calculate the new widths based on the new window size
@@ -93,4 +81,26 @@ class LoginFrame(tk.Frame):
         self.username_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
         self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
         self.login_button.config(width=int(min(button_width, self.max_button_width)))
+        
+    def login_action(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        # Validate the login information
+        if self.validate_login(username, password):
+            messagebox.showinfo("Access Granted", "Welcome! Your login information is correct.")
+        else:
+            messagebox.showinfo("Login Failed", "The username or password is incorrect.")
+
+    def validate_login(self, username, password):
+        try:
+            with open('credentials.bin', 'rb') as file:
+                credentials = pickle.load(file)
+                if credentials['username'] == username and credentials['password'] == password:
+                    return True
+        except FileNotFoundError:
+            messagebox.showerror("Error", "Credentials file not found.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
+        return False
                 
