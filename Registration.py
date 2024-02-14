@@ -39,13 +39,13 @@ class RegistrationFrame(tk.Frame):
         title_label.grid(row=1, column=0, columnspan=3, pady=(10, 20), sticky='nsew')
 
         # Create the username, password, and confirm password entries
-        self.username_entry = PlaceholderEntry(self, placeholder="Username...")
+        self.username_entry = PlaceholderEntry(self, placeholder="Username...", hide_text=False)
         self.username_entry.grid(row=3, column=0, columnspan=3, padx=20, pady=(20, 10))
 
-        self.password_entry = PlaceholderEntry(self, placeholder="Password...")
+        self.password_entry = PlaceholderEntry(self, placeholder="Password...", hide_text=True)
         self.password_entry.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
 
-        self.confirm_password_entry = PlaceholderEntry(self, placeholder="Confirm Password...")
+        self.confirm_password_entry = PlaceholderEntry(self, placeholder="Confirm Password...", hide_text=True)
         self.confirm_password_entry.grid(row=5, column=0, columnspan=3, padx=20, pady=10)
 
         # Password requirements box

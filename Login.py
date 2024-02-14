@@ -54,11 +54,11 @@ class LoginFrame(tk.Frame):
         title_label.grid(row=1, column=0, columnspan=3, pady=(10, 20), sticky='nsew')
 
         # Create the username and password entries
-        self.username_entry = PlaceholderEntry(self, placeholder="Username...")
+        self.username_entry = PlaceholderEntry(self, placeholder="Username...", hide_text=False)
         self.username_entry.grid(row=3, column=0, columnspan=3, padx=20, pady=(20, 10))
         self.username_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
 
-        self.password_entry = PlaceholderEntry(self, placeholder="Password...", show="*")
+        self.password_entry = PlaceholderEntry(self, placeholder="Password...", hide_text=True)
         self.password_entry.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
         self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
         
