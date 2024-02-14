@@ -20,25 +20,26 @@ class RegistrationFrame(tk.Frame):
         self.window_height = int(self.master.winfo_screenheight() * 0.25)
         self.master.geometry(f"{self.window_width}x{self.window_height}")
 
+        # Populate frame with widgets.
         self.create_widgets()
 
         # Bind the resize event
         self.master.bind('<Configure>', self.on_resize)
 
     def create_widgets(self):
+       
         # Configure the grid layout
-
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
         self.columnconfigure(2, weight=1)
         for i in range(8):
             self.rowconfigure(i, weight=1)
 
-        # Add a big title label
+        # Registration label
         title_label = tk.Label(self, text="Register", font=("Helvetica", 24, "bold"))
         title_label.grid(row=1, column=0, columnspan=3, pady=(10, 20), sticky='nsew')
 
-        # Create the username, password, and confirm password entries
+        # Create the username, password, and confirm password text entries
         self.username_entry = PlaceholderEntry(self, placeholder="Username...", hide_text=False)
         self.username_entry.grid(row=3, column=0, columnspan=3, padx=20, pady=(20, 10))
 
@@ -60,8 +61,9 @@ class RegistrationFrame(tk.Frame):
         self.switch_button = tk.Button(self, text="Switch to Login", command=self.on_show_other_frame)
         self.switch_button.grid(row=7, column=0, columnspan=3, padx=20, pady=0)
 
+    # Calculate the new widths based on the new window size
     def on_resize(self, event):
-        # Calculate the new widths based on the new window size
+        # Applys scaler to current width of window to find appropriate sizes
         text_field_width = event.width * 0.5
         button_width = event.width * 0.4
 
@@ -78,24 +80,24 @@ class RegistrationFrame(tk.Frame):
         confirm_password = self.confirm_password_entry.get()
         
         if password != confirm_password:
-            messagebox.showerror("Registration Failed", "Password and Confirm password do not match")
-        elif not self.validate_password(password):  # Using 'not' for clarity
+            messagebox.showerror("Registration Failed", "Password and Confirm password do not match")         
+        elif not self.validate_password(password):              
             messagebox.showerror("Registration Failed", "Password does not meet requirements, please try again")
         else:
-            self.clear_credentials()  # Clear any existing credentials
-            hashed_password = Hashing.hash_password(password)  # Hash the password
-            self.save_credentials(username, hashed_password)  # Save the new credentials
+            self.clear_credentials()                            # Clear any existing credentials
+            hashed_password = Hashing.hash_password(password)   # Hash the password
+            self.save_credentials(username, hashed_password)    # Save the new credentials
             messagebox.showinfo("Registration Success", "You have been registered successfully.")
-            
-            # For demonstration purposes, show the username and hashed password
-            self.show_credentials(username, hashed_password)
-            
-            #self.on_show_other_frame()  # Optionally switch to login frame after successful registration
+        
+            self.show_credentials(username, hashed_password)    # For demonstration purposes, show the username and hashed password
+            self.on_show_other_frame()                          # switch to login frame after successful registration
 
     
+    # Clears credential file for new credentials to be written in
     def clear_credentials(self):
         open('credentials.bin', 'wb').close()     
         
+    # THIS IS A DEV FUNCTION FOR THURSDAY 15/02/2024 SHOWCASE. DELETE FOR OFFICIAL RELEASE    
     def show_credentials(self, username, hashed_password):
         # Construct the message string with the username and hashed password
         credentials_info = f"Username: {username}\nHashed Password: {hashed_password}"
@@ -119,10 +121,9 @@ class RegistrationFrame(tk.Frame):
             return False
         return True
 
-    # After validate, this will save user inputs to credentials.bin, seperating details with "username" and "password" <- This is will change with hashing later
+    # After validate, this will save user inputs to credentials.bin, seperating details with "username" and "password"
     def save_credentials(self, username, hashed_password):
-        # Here, `hashed_password` already contains the salt and hash
-        credentials = {'username': username, 'password': hashed_password}
+        credentials = {'username': username, 'password': hashed_password}         # hashed_password already contains the salt and hash
         with open('credentials.bin', 'wb') as file:
             pickle.dump(credentials, file)
 

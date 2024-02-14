@@ -108,15 +108,12 @@ class LoginFrame(tk.Frame):
             messagebox.showinfo("Login Failed", "The username or password is incorrect.")
 
     # Reads credentails file and validates that passed inputs are the same as data stored in file. 
-    # WARNING THIS IS UNENCRYPTED, ADD HASHING NEXT AND PASS DECRYPT FUNCITON INTO HERE.
     def validate_login(self, username, password):
         try:
             with open('credentials.bin', 'rb') as file:
                 credentials = pickle.load(file)
-                # Check if the username matches
-                if credentials['username'] == username:
-                    # Use the verify_password method to check the password
-                    return Hashing.verify_password(credentials['password'], password)
+                if credentials['username'] == username:                                 # Check if the username matches
+                    return Hashing.verify_password(credentials['password'], password)   # Use the verify_password method to check the password
         except FileNotFoundError:
             messagebox.showerror("Error", "Credentials file not found.")
         except Exception as e:
