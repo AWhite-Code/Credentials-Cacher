@@ -1,4 +1,6 @@
 # Byte-compile / optimized / DLL files
 __pycache__/
-*.py[cod] 
+*.py[cod]
+
+# Credentials file
 credentials.bin
