@@ -77,19 +77,18 @@ class RegistrationFrame(tk.Frame):
         password = self.password_entry.get()
         confirm_password = self.confirm_password_entry.get()
 
-        # Check if the password meets the requirements
-        if not self.validate_password(password):
-            messagebox.showerror("Registration Failed", "Password does not meet the requirements.")
-            return
-
-        # Check if passwords match
-        if password != confirm_password:
-            messagebox.showerror("Registration Failed", "Passwords do not match.")
-            return
-
-        # Save the username and password to a binary file
-        self.save_credentials(username, password)
-        messagebox.showinfo("Registration Success", "You have registered successfully.")
+        # Assuming you've done the necessary validation checks and the registration is successful...
+        if self.validate_password(password) and password == confirm_password:
+            self.clear_credentials()  # Clear any existing credentials
+            self.save_credentials(username, password)  # Save the new credentials
+            messagebox.showinfo("Registration Success", "You have been registered successfully.")
+            self.on_show_other_frame()  # Switch to login frame after successful registration
+        else:
+            # If the validation fails, show an error message
+            messagebox.showerror("Registration Failed", "Please check the details and try again.")
+    
+    def clear_credentials(self):
+        open('credentials.bin', 'wb').close()     
 
     def validate_password(self, password):
         # Define the password requirements here
@@ -105,3 +104,6 @@ class RegistrationFrame(tk.Frame):
         credentials = {'username': username, 'password': password}
         with open('credentials.bin', 'wb') as file:
             pickle.dump(credentials, file)
+
+    def on_show_other_frame(self):
+        self.master.toggle_frames()

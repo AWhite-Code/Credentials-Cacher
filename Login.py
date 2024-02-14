@@ -68,9 +68,18 @@ class LoginFrame(tk.Frame):
         self.login_button.grid(row=6, column=0, columnspan=3, padx=20, pady=(10, 20))
         self.login_button.config(width=int(min(button_width, self.max_button_width)))
 
-        # Create the switch to registration button in the lower left corner
-        self.switch_button = tk.Button(self, text="Switch to Registration", command=self.on_show_other_frame)
-        self.switch_button.grid(row=7, column=0, columnspan=3, padx=20, pady=10)
+        # Create the forgot my password hyperlink
+        self.forgot_password_label = tk.Label(self, text="Forgot my password", fg="blue", cursor="hand2")
+        self.forgot_password_label.grid(row=8, column=1, sticky='e')  # Adjust grid placement as needed
+        self.forgot_password_label.bind("<Button-1>", lambda event: self.on_show_other_frame())
+    
+    def forgot_password(self, event=None):
+        # Logic for forgot password
+        self.on_show_other_frame()
+        
+    # This method should be passed to the LoginFrame upon initialization    
+    def on_show_other_frame(self):
+        self.master.toggle_frames()        
             
     def on_resize(self, event):
         # Calculate the new widths based on the new window size
