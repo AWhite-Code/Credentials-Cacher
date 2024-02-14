@@ -34,12 +34,10 @@ class MainWindow:
         # Check if the binary file exists and is not empty
         if os.path.exists('credentials.bin'):
             try:
-                with open('credentials.bin', 'rb') as file:
-                    # Try to load the credentials
+                with open('credentials.bin', 'rb') as file: # Try to load the credentials
                     credentials = pickle.load(file)
-                    return bool(credentials)  # Return True if credentials are not empty
-            except EOFError:
-                # Empty file
+                    return bool(credentials)                # Return True if credentials are not empty
+            except EOFError:                                # Empty file
                 return False
         return False
 

@@ -14,21 +14,21 @@ class PlaceholderEntry(tk.Entry):
 
         self.put_placeholder()
 
+    # Add place holder to text box
     def put_placeholder(self):
         self.insert(0, self.placeholder)
         self['fg'] = self.placeholder_color
-        # Only apply masking if hide_text is True and it's not displaying placeholder
-        self['show'] = '*' if self.hide_text and self.get() != self.placeholder else ''
+        self['show'] =  '*' if self.hide_text and self.get() != self.placeholder else ''     # Only apply masking if hide_text is True and it's not displaying placeholder
 
+    # User focused/selected the text box
     def foc_in(self, *args):
         if self['fg'] == self.placeholder_color:
             self.delete('0', 'end')
             self['fg'] = self.default_fg_color
-            # Apply masking based on the hide_text flag
-            self['show'] = '*' if self.hide_text else ''
+            self['show'] = '*' if self.hide_text else ''        # Apply masking based on the hide_text flag
 
+    # User unfocused/selected the text box
     def foc_out(self, *args):
         if not self.get():
             self.put_placeholder()
-            # Ensure masking is removed if showing placeholder again
-            self['show'] = ''
+            self['show'] = ''                                   # Ensure masking removed if showing placeholder again
