@@ -57,30 +57,31 @@ class LoginFrame(tk.Frame):
         self.password_entry = PlaceholderEntry(self, placeholder="Password...", show="*")
         self.password_entry.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
         self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
+        
+        # Create the forgot my password hyperlink
+        self.forgot_password_label = tk.Label(self, text="Forgot my password", fg="blue", cursor="hand2")
+        self.forgot_password_label.grid(row=5, column=1, sticky='nesw')  # Adjust grid placement as needed
+        self.forgot_password_label.bind("<Button-1>", lambda event: self.on_show_other_frame())
 
         # Create a remember username checkbox
         self.remember_var = tk.BooleanVar()
         self.remember_check = tk.Checkbutton(self, text="Remember Username", variable=self.remember_var)
-        self.remember_check.grid(row=5, column=0, columnspan=3, padx=20, pady=10)
+        self.remember_check.grid(row=6, column=0, columnspan=3, padx=20, pady=10)
 
         # Create the login button
         self.login_button = tk.Button(self, text="Login", command=self.login_action)
-        self.login_button.grid(row=6, column=0, columnspan=3, padx=20, pady=(10, 20))
+        self.login_button.grid(row=7, column=0, columnspan=3, padx=20, pady=(10, 20))
         self.login_button.config(width=int(min(button_width, self.max_button_width)))
-
-        # Create the forgot my password hyperlink
-        self.forgot_password_label = tk.Label(self, text="Forgot my password", fg="blue", cursor="hand2")
-        self.forgot_password_label.grid(row=8, column=1, sticky='e')  # Adjust grid placement as needed
-        self.forgot_password_label.bind("<Button-1>", lambda event: self.on_show_other_frame())
     
+    # Calls Window.py function to swap frame to registration
     def forgot_password(self, event=None):
-        # Logic for forgot password
         self.on_show_other_frame()
         
-    # This method should be passed to the LoginFrame upon initialization    
+    # This method should be passed to the LoginFrame upon initialization, sort of an artifact now and needs to be cleaned up on next refactor   
     def on_show_other_frame(self):
         self.master.toggle_frames()        
             
+    # Logic for changing UI when window is resized, not much functionality right now.        
     def on_resize(self, event):
         # Calculate the new widths based on the new window size
         text_field_width = event.width * 0.5

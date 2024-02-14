@@ -16,11 +16,13 @@ class PlaceholderEntry(tk.Entry):
     def put_placeholder(self):
         self.insert(0, self.placeholder)
         self['fg'] = self.placeholder_color
+        self['show'] = ''  # No masking when showing the placeholder
 
     def foc_in(self, *args):
         if self['fg'] == self.placeholder_color:
             self.delete('0', 'end')
             self['fg'] = self.default_fg_color
+            self['show'] = '*'  # Mask input after placeholder is removed
 
     def foc_out(self, *args):
         if not self.get():
