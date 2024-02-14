@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from placeholder_entry import PlaceholderEntry
 import pickle
+from Hashing import Hashing
 
 class LoginFrame(tk.Frame):
     def __init__(self, master, on_show_other_frame):
@@ -112,11 +113,12 @@ class LoginFrame(tk.Frame):
         try:
             with open('credentials.bin', 'rb') as file:
                 credentials = pickle.load(file)
-                if credentials['username'] == username and credentials['password'] == password:
-                    return True
-        except FileNotFoundError: # File not found
+                # Check if the username matches
+                if credentials['username'] == username:
+                    # Use the verify_password method to check the password
+                    return Hashing.verify_password(credentials['password'], password)
+        except FileNotFoundError:
             messagebox.showerror("Error", "Credentials file not found.")
-        except Exception as e: # Unknown error
+        except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
         return False
-                
