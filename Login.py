@@ -26,6 +26,7 @@ class LoginFrame(tk.Frame):
         self.max_text_field_width = self.window_width * 0.1
         self.max_button_width = self.window_width * 0.1
 
+        # Draw widgets onto the screen
         self.create_widgets()
 
         # Bind the resize event
@@ -39,10 +40,12 @@ class LoginFrame(tk.Frame):
         text_field_width = window_width * 0.5
         button_width = window_width * 0.4
         
+        # Generate the three columns. column 1 has a higher weight to improve spacing
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
         self.columnconfigure(2, weight=1)
         
+        # Generate all the rows for GUI grid
         for i in range(7):
             self.rowconfigure(i, weight=1)
         
@@ -58,9 +61,9 @@ class LoginFrame(tk.Frame):
         self.password_entry.grid(row=4, column=0, columnspan=3, padx=20, pady=10)
         self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
         
-        # Create the forgot my password hyperlink
+        # Create the forgot my password "hyperlink"
         self.forgot_password_label = tk.Label(self, text="Forgot my password", fg="blue", cursor="hand2")
-        self.forgot_password_label.grid(row=5, column=1, sticky='nesw')  # Adjust grid placement as needed
+        self.forgot_password_label.grid(row=5, column=1, sticky='nesw')
         self.forgot_password_label.bind("<Button-1>", lambda event: self.on_show_other_frame())
 
         # Create a remember username checkbox
@@ -91,7 +94,8 @@ class LoginFrame(tk.Frame):
         self.username_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
         self.password_entry.config(width=int(min(text_field_width, self.max_text_field_width)))
         self.login_button.config(width=int(min(button_width, self.max_button_width)))
-        
+    
+    # Function to read from user input and call validation function    
     def login_action(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
@@ -102,15 +106,17 @@ class LoginFrame(tk.Frame):
         else:
             messagebox.showinfo("Login Failed", "The username or password is incorrect.")
 
+    # Reads credentails file and validates that passed inputs are the same as data stored in file. 
+    # WARNING THIS IS UNENCRYPTED, ADD HASHING NEXT AND PASS DECRYPT FUNCITON INTO HERE.
     def validate_login(self, username, password):
         try:
             with open('credentials.bin', 'rb') as file:
                 credentials = pickle.load(file)
                 if credentials['username'] == username and credentials['password'] == password:
                     return True
-        except FileNotFoundError:
+        except FileNotFoundError: # File not found
             messagebox.showerror("Error", "Credentials file not found.")
-        except Exception as e:
+        except Exception as e: # Unknown error
             messagebox.showerror("Error", f"An error occurred: {e}")
         return False
                 

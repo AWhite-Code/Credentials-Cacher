@@ -1,5 +1,7 @@
 import tkinter as tk
 
+# Custom text box widget that displays a placeholder string inside of it as grey text.
+# Once user starts writing it is overwritten, if required it can be masked. 
 class PlaceholderEntry(tk.Entry):
     def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey', **kwargs):
         super().__init__(master, **kwargs)
