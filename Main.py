@@ -5,7 +5,7 @@ from Database import Database
 def main():
     db = Database()
     app = QApplication([])  # Create an instance of QApplication
-    main_window = MainWindow()  # Now you can create your MainWindow
+    main_window = MainWindow(db)  # Now you can create your MainWindow
     main_window.show()  # Show the main window
     app.exec_()  # Start the application's event loop
 

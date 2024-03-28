@@ -7,8 +7,9 @@ import os
 import pickle
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, db):
         super().__init__()
+        self.db = db  # Save the db instance for later use
         self.setWindowTitle("Credentials Cacher")
         
         # Set initial size to 40% of the screen's width and height
@@ -51,3 +52,9 @@ class MainWindow(QMainWindow):
             except EOFError:                                # Empty file
                 return False
         return False
+    
+    # Ensure the database connected is severed to prevent data sitting in memory
+    # This may be overkill for the scope of the project as memory manipulation is kinda sophisticated
+    def closeEvent(self, event):
+        self.db.close_connection()
+        event.accept()  # Close the PYQT window normally

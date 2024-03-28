@@ -33,3 +33,7 @@ class Database:
         """
         cursor.execute(table_creation_query)
         self.connection.commit()  # Commits the CREATE TABLE operation
+        
+    def close_connection(self):
+        if self.connection:
+            self.connection.close()
