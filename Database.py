@@ -40,6 +40,13 @@ class Database:
                 VALUES (?, ?, ?, ?, ?);"""
         cursor.execute(query, (website_name, website_url, username, password, notes))
         self.connection.commit()
+        
+    def fetch_all_entries(self):
+        cursor = self.connection.cursor()
+        query = "SELECT * FROM vault;"
+        cursor.execute(query)
+        entries = cursor.fetchall()  # Fetches all rows of a query result, returning a list.
+        return entries    
             
     def close_connection(self):
         if self.connection:
