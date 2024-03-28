@@ -1,34 +1,42 @@
-import tkinter as tk
-from Login import LoginFrame
-from Registration import RegistrationFrame
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QStackedWidget
+from PyQt5.QtCore import QSize, Qt
+from Login import LoginWidget
+from Registration import RegistrationWidget
 import os
 import pickle
 
-class MainWindow:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Credentials Cacher")
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Credentials Cacher")
+        
+        # Set initial size to 40% of the screen's width and height
+        screen_size = QApplication.primaryScreen().size()
+        width = int(screen_size.width() * 0.4)  # Ensure width is an integer
+        height = int(screen_size.height() * 0.4)  # Ensure height is an integer
+        self.resize(width, height)  # This should now work without type errors
 
-        # Initialize frames
-        self.frames = {}
-        self.frames['registration'] = RegistrationFrame(self.root, self.toggle_frames)
-        self.frames['login'] = LoginFrame(self.root, self.toggle_frames)
+        # Initialize stack for widgets
+        self.stacked_widgets = QStackedWidget()
+        self.setCentralWidget(self.stacked_widgets)
 
-        # Decide which frame to show on start
-        self.current_frame = 'login' if self.check_credentials_exist() else 'registration'
-        self.show_frame(self.current_frame)
+        # Initialize widgets
+        self.login_widget = LoginWidget(self.toggle_widgets)
+        self.registration_widget = RegistrationWidget(self.toggle_widgets)
 
-    def show_frame(self, frame_key):
-        frame = self.frames[frame_key]
-        frame.tkraise()
+        # Add widgets to the stack
+        self.stacked_widgets.addWidget(self.registration_widget)
+        self.stacked_widgets.addWidget(self.login_widget)
 
-    def toggle_frames(self):
-        if self.current_frame == 'login':
-            self.show_frame('registration')
-            self.current_frame = 'registration'
+        # Decide which widget to show on start
+        self.current_widget = self.login_widget if self.check_credentials_exist() else self.registration_widget
+        self.stacked_widgets.setCurrentWidget(self.current_widget)
+
+    def toggle_widgets(self):
+        if self.stacked_widgets.currentWidget() == self.login_widget:
+            self.stacked_widgets.setCurrentWidget(self.registration_widget)
         else:
-            self.show_frame('login')
-            self.current_frame = 'login'
+            self.stacked_widgets.setCurrentWidget(self.login_widget)
 
     def check_credentials_exist(self):
         # Check if the binary file exists and is not empty
@@ -41,8 +49,11 @@ class MainWindow:
                 return False
         return False
 
-# Usage example
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = MainWindow(root)
-    root.mainloop()
+def main():
+    app = QApplication([])
+    window = MainWindow()
+    window.show()
+    app.exec_()
+
+if __name__ == '__main__':
+    main()
