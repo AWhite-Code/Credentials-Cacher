@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QStackedWidget
 from PyQt5.QtCore import QSize, Qt
 from Login import LoginWidget
+from Vault_Window import VaultWidget
 from Registration import RegistrationWidget
 import os
 import pickle
@@ -21,12 +22,14 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widgets)
 
         # Initialize widgets
-        self.login_widget = LoginWidget(self.toggle_widgets)
+        self.login_widget = LoginWidget(self.toggle_widgets, self)
         self.registration_widget = RegistrationWidget(self.toggle_widgets)
+        self.vault_widget = VaultWidget()
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)
         self.stacked_widgets.addWidget(self.login_widget)
+        self.stacked_widgets.addWidget(self.vault_widget)
 
         # Decide which widget to show on start
         self.current_widget = self.login_widget if self.check_credentials_exist() else self.registration_widget
