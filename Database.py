@@ -34,6 +34,13 @@ class Database:
         cursor.execute(table_creation_query)
         self.connection.commit()  # Commits the CREATE TABLE operation
         
+    def add_password_entry(self, website_name, website_url, username, password, notes):
+        cursor = self.connection.cursor()
+        query = """INSERT INTO vault (website_name, website_url, username, password, notes)
+                VALUES (?, ?, ?, ?, ?);"""
+        cursor.execute(query, (website_name, website_url, username, password, notes))
+        self.connection.commit()
+            
     def close_connection(self):
         if self.connection:
             self.connection.close()

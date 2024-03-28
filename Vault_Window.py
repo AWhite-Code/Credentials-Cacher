@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QPushButton, QLabel, QLineEdit, QVBoxLayout
 
 class VaultWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, db, parent=None):
         super(VaultWidget, self).__init__(parent)
+        self.db = db
         self.init_ui()
 
     def init_ui(self):
@@ -88,3 +89,22 @@ class VaultWidget(QWidget):
         # Here you'd call your database insertion method, passing the collected data
         # For now, let's just print the data to confirm the method is being called
         print("Submitting:", website_name, website_url, username, password, notes)
+        
+    def submit_password_details(self):
+        # Assuming you've stored the db instance in self.db in VaultWidget's __init__
+        website_name = self.website_name_entry.text()
+        website_url = self.website_url_entry.text()
+        username = self.username_entry.text()
+        password = self.password_entry.text() 
+        notes = self.notes_entry.text()
+        self.db.add_password_entry(website_name, website_url, username, password, notes)
+
+        # Clear the fields after submission
+        self.website_name_entry.clear()
+        self.website_url_entry.clear()
+        self.username_entry.clear()
+        self.password_entry.clear()
+        self.notes_entry.clear()
+        
+        # Toggle the add password UI to hide it
+        self.toggle_add_password_container()

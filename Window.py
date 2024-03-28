@@ -10,6 +10,8 @@ class MainWindow(QMainWindow):
     def __init__(self, db):
         super().__init__()
         self.db = db  # Save the db instance for later use
+        self.vault_widget = VaultWidget(self.db)
+        
         self.setWindowTitle("Credentials Cacher")
         
         # Set initial size to 40% of the screen's width and height
@@ -25,7 +27,7 @@ class MainWindow(QMainWindow):
         # Initialize widgets
         self.login_widget = LoginWidget(self.toggle_widgets, self)
         self.registration_widget = RegistrationWidget(self.toggle_widgets)
-        self.vault_widget = VaultWidget()
+        self.vault_widget = VaultWidget(db)
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)
