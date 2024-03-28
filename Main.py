@@ -1,7 +1,9 @@
 from PyQt5.QtWidgets import QApplication
 from Window import MainWindow
+from Database import Database
 
 def main():
+    Database.get_db_path()
     app = QApplication([])  # Create an instance of QApplication
     main_window = MainWindow()  # Now you can create your MainWindow
     main_window.show()  # Show the main window
