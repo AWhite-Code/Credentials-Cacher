@@ -51,12 +51,3 @@ class MainWindow(QMainWindow):
             except EOFError:                                # Empty file
                 return False
         return False
-
-def main():
-    app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec_()
-
-if __name__ == '__main__':
-    main()

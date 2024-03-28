@@ -3,7 +3,7 @@ from Window import MainWindow
 from Database import Database
 
 def main():
-    Database.get_db_path()
+    db = Database()
     app = QApplication([])  # Create an instance of QApplication
     main_window = MainWindow()  # Now you can create your MainWindow
     main_window.show()  # Show the main window

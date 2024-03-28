@@ -33,7 +33,3 @@ class Database:
         """
         cursor.execute(table_creation_query)
         self.connection.commit()  # Commits the CREATE TABLE operation
-
-# Usage
-if __name__ == "__main__":
-    db = Database()
