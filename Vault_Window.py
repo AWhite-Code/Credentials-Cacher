@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QFormLayout, QLineEdit, QGridLayout, QApplication
+    QWidget, QPushButton, QFormLayout, QLineEdit, QGridLayout, QApplication, QSpacerItem, QSizePolicy
 )
 
 class VaultWidget(QWidget):
@@ -10,40 +10,50 @@ class VaultWidget(QWidget):
         self.applyStylesheet()
 
     def init_ui(self):
-        """Initializes the user interface."""
         gridLayout = QGridLayout(self)
 
-        # Initialize "Add Password" button and configure its width.
+        # "Add Password" button in the bottom-left corner (row 2, column 0)
         self.add_password_button = QPushButton("Add Password", self)
-        self.adjustButtonWidth()
-        # Place the "Add Password" button at the bottom-left corner.
         gridLayout.addWidget(self.add_password_button, 2, 0)
 
-        # Initialize and configure the "Add Password" form.
-        self.init_add_password_form()
-        # Position the form in the center column, spanning multiple rows.
-        gridLayout.addWidget(self.addPasswordFormWidget, 0, 1, 3, 2)
+        # Horizontal spacer to push the form to the right (already in place)
+        spacerRight = QSpacerItem(20, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
+        gridLayout.addItem(spacerRight, 0, 0)
 
-        # Connect the button click to toggle the form's visibility.
+        # Initialize the "Add Password" form, set for the central column
+        self.init_add_password_form()
+        
+        # Vertical spacer to push the form down
+        spacerTop = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        # Add the vertical spacer above the row where the form will be placed
+        gridLayout.addItem(spacerTop, 0, 1)  # Adjust the position as needed
+
+        # Now, place the form immediately below the vertical spacer
+        gridLayout.addWidget(self.addPasswordFormWidget, 1, 1, 1, 1)  # Adjust grid placement as needed
+
+        # Top-right corner spacer to maintain grid shape (if still necessary)
+        gridLayout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 2)
+        
         self.add_password_button.clicked.connect(self.toggle_add_password_form)
-        # Initially hide the form.
         self.addPasswordFormWidget.setVisible(False)
 
     def init_add_password_form(self):
         """Initializes the 'Add Password' form."""
         self.addPasswordFormWidget = QWidget()
+        # Set the size policy for the form to be Preferred and Maximum, allowing it to shrink or expand as needed
+        self.addPasswordFormWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+
         formLayout = QFormLayout(self.addPasswordFormWidget)
+        formLayout.setVerticalSpacing(50)
 
         # Initialize form fields.
         self.website_name_entry = QLineEdit()
         self.website_url_entry = QLineEdit()
         self.username_entry = QLineEdit()
         self.password_entry = QLineEdit()
+        self.password_entry.setEchoMode(QLineEdit.Password)  # Mask input for password
         self.notes_entry = QLineEdit()
         self.submit_button = QPushButton("Submit")
-
-        # Set password field to mask input.
-        self.password_entry.setEchoMode(QLineEdit.Password)
 
         # Add form fields to the layout.
         formLayout.addRow("Website Name", self.website_name_entry)

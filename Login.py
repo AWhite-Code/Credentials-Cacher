@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 import pickle
-from Hashing import Hashing  # Make sure to refactor Hashing to work with PyQt if necessary
+from Hashing import Hashing
 from Vault_Window import VaultWidget
 
 class LoginWidget(QWidget):
@@ -84,7 +84,6 @@ class LoginWidget(QWidget):
 
         # Validate the login information
         if self.validate_login(username, password):
-            # Here you would switch to the vault widget instead of opening a new window
              self.main_window.stacked_widgets.setCurrentWidget(self.main_window.vault_widget)
         else:
             QMessageBox.warning(self, "Login Failed", "The username or password is incorrect.")

@@ -9,7 +9,7 @@ class Database:
 
     def get_db_path(self):
         app_data_path = os.getenv('APPDATA')  # Gets the AppData path
-        db_directory = os.path.join(app_data_path, 'Credentials Cacher')  # Specify your app's name
+        db_directory = os.path.join(app_data_path, 'Credentials Cacher') 
         if not os.path.exists(db_directory):
             os.makedirs(db_directory)  # Creates the directory if it doesn't exist
         return os.path.join(db_directory, 'passwords.db')  # Path for the database file
