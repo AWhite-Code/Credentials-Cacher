@@ -22,12 +22,15 @@ class VaultWidget(QWidget):
     def setupTopBar(self):
         self.topBarLayout = QHBoxLayout()
         titleLabel = QLabel("Credentials Cachers")
-        searchLineEdit = QLineEdit()
-        searchLineEdit.setPlaceholderText("Search...")
+        self.searchLineEdit = QLineEdit()
+        self.searchLineEdit.setPlaceholderText("Search...")
         optionsButton = QPushButton("Options")
         
+        # Connect the textChanged signal to the search_vault method
+        self.searchLineEdit.textChanged.connect(self.search_vault)
+        
         self.topBarLayout.addWidget(titleLabel)
-        self.topBarLayout.addWidget(searchLineEdit)
+        self.topBarLayout.addWidget(self.searchLineEdit)
         self.topBarLayout.addWidget(optionsButton)
         
         self.mainLayout.addLayout(self.topBarLayout)
@@ -103,14 +106,17 @@ class VaultWidget(QWidget):
 
     def setupRightColumn(self):
         self.rightColumnLayout = QVBoxLayout()
-        
+
+        # Explicitly setting spacing and margins to see immediate effects
+        self.rightColumnLayout.setSpacing(50)  # Adjust this value as needed
+        self.rightColumnLayout.setContentsMargins(10, 10, 10, 10)
+
         # Name row setup
         nameRowLayout = QHBoxLayout()
         nameLabel = QLabel("Name:")
         self.nameLineEdit = QLineEdit()
-        self.nameLineEdit.setMaximumWidth(200)
+        self.nameLineEdit.setMaximumWidth(160)
         self.nameLineEdit.setReadOnly(True)
-        nameRowLayout.addStretch(1)  # Push everything to the right
         nameRowLayout.addWidget(nameLabel)
         nameRowLayout.addWidget(self.nameLineEdit)
 
@@ -118,9 +124,8 @@ class VaultWidget(QWidget):
         usernameRowLayout = QHBoxLayout()
         usernameLabel = QLabel("Username:")
         self.usernameLineEdit = QLineEdit()
-        self.usernameLineEdit.setMaximumWidth(200)
+        self.usernameLineEdit.setMaximumWidth(300)
         self.usernameLineEdit.setReadOnly(True)
-        usernameRowLayout.addStretch(1)  # Push everything to the right
         usernameRowLayout.addWidget(usernameLabel)
         usernameRowLayout.addWidget(self.usernameLineEdit)
 
@@ -128,33 +133,32 @@ class VaultWidget(QWidget):
         passwordRowLayout = QHBoxLayout()
         passwordLabel = QLabel("Password:")
         self.passwordLineEdit = QLineEdit()
-        self.passwordLineEdit.setMaximumWidth(200)
+        self.passwordLineEdit.setMaximumWidth(190)
         self.passwordLineEdit.setReadOnly(True)
-        passwordRowLayout.addStretch(1)  # Push everything to the right
         passwordRowLayout.addWidget(passwordLabel)
         passwordRowLayout.addWidget(self.passwordLineEdit)
 
-        # Website  Address row setup
+        # Website Address row setup
         sitenameRowLayout = QHBoxLayout()
         sitenameLabel = QLabel("Website:")
         self.sitenameLineEdit = QLineEdit()
-        self.sitenameLineEdit.setMaximumWidth(300)
+        self.sitenameLineEdit.setMaximumWidth(160)
         self.sitenameLineEdit.setReadOnly(True)
-        sitenameRowLayout.addStretch(1)  # Push everything to the right
         sitenameRowLayout.addWidget(sitenameLabel)
         sitenameRowLayout.addWidget(self.sitenameLineEdit)
 
-        # Add each row layout to the rightColumnLayout
+        # Adding row layouts to the right column layout
         self.rightColumnLayout.addLayout(nameRowLayout)
         self.rightColumnLayout.addLayout(usernameRowLayout)
         self.rightColumnLayout.addLayout(passwordRowLayout)
         self.rightColumnLayout.addLayout(sitenameRowLayout)
 
-        # Adjust spacing between rows
-        self.rightColumnLayout.setSpacing(1)
+        # Add stretch to push all content to the top
+        self.rightColumnLayout.addStretch(1)
 
         # Now add the rightColumnLayout to the main content layout
         self.mainContentLayout.addLayout(self.rightColumnLayout, 0)
+        
 
     def toggle_view(self, stackedWidget):
         if stackedWidget.currentIndex() == 0:
@@ -222,6 +226,8 @@ class VaultWidget(QWidget):
         # Clear form fields and hide the form.
         self.clear_form_fields()
         self.toggle_add_password_form()
+        
+        self.populate_vault()
 
     def clear_form_fields(self):
         """Clears all input fields in the form."""
@@ -232,10 +238,20 @@ class VaultWidget(QWidget):
         self.notes_entry.clear()
     
     def populate_vault(self):
+        # Fetch the updated list of entries from the database
         entries = self.db.fetch_all_entries()
+
+        # Clear existing content in the vault display area (scrollContent)
+        for i in reversed(range(self.scrollContentLayout.count())): 
+            widget = self.scrollContentLayout.itemAt(i).widget()
+            if widget is not None: 
+                widget.deleteLater()
+
+        # Repopulate the vault with updated entries
         for entry in entries:
             button = PasswordEntryButton(entry, self.display_entry_details)
-            self.scrollContentLayout.addWidget(button)  # Add buttons to the layout
+            self.scrollContentLayout.addWidget(button)  # Add the button to the vault
+
 
 
 
