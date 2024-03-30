@@ -237,22 +237,27 @@ class VaultWidget(QWidget):
         self.password_entry.clear()
         self.notes_entry.clear()
     
-    def populate_vault(self):
-        # Fetch the updated list of entries from the database
-        entries = self.db.fetch_all_entries()
-
-        # Clear existing content in the vault display area (scrollContent)
+    def populate_vault(self, entries=None):
+        if entries is None:
+            entries = self.db.fetch_all_entries()
+        
+        # Clear existing content in the vault display area
         for i in reversed(range(self.scrollContentLayout.count())): 
             widget = self.scrollContentLayout.itemAt(i).widget()
             if widget is not None: 
                 widget.deleteLater()
 
-        # Repopulate the vault with updated entries
+        # Add filtered or all entries to the vault
         for entry in entries:
             button = PasswordEntryButton(entry, self.display_entry_details)
-            self.scrollContentLayout.addWidget(button)  # Add the button to the vault
+            self.scrollContentLayout.addWidget(button)
 
+    def search_vault(self):
+        search_query = self.searchLineEdit.text().lower()
+        all_entries = self.db.fetch_all_entries()
+        filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
 
+        self.populate_vault(filtered_entries)
 
 
     def display_entry_details(self, entry_data):
