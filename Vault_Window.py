@@ -1,61 +1,104 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QFormLayout, QLineEdit, QGridLayout, QApplication, QSpacerItem, QSizePolicy
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QApplication, QFrame, QSpacerItem, QSizePolicy, QStackedWidget
 )
+from PyQt5.QtCore import Qt
 
 class VaultWidget(QWidget):
     def __init__(self, db, parent=None):
         super().__init__(parent)
         self.db = db
-        self.init_ui()
-        self.applyStylesheet()
+        self.initUI()
 
-    def init_ui(self):
-        gridLayout = QGridLayout(self)
-
-        # "Add Password" button in the bottom-left corner (row 2, column 0)
-        self.add_password_button = QPushButton("Add Password", self)
-        gridLayout.addWidget(self.add_password_button, 2, 0)
-
-        # Horizontal spacer to push the form to the right (already in place)
-        spacerRight = QSpacerItem(20, 20, QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
-        gridLayout.addItem(spacerRight, 0, 0)
-
-        # Initialize the "Add Password" form, set for the central column
-        self.init_add_password_form()
+    def initUI(self):
+        # Main layout
+        self.mainLayout = QVBoxLayout(self)
         
-        # Vertical spacer to push the form down
-        spacerTop = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        # Add the vertical spacer above the row where the form will be placed
-        gridLayout.addItem(spacerTop, 0, 1)  # Adjust the position as needed
+        # Setup sublayouts
+        self.setupTopBar()
+        self.setupMainContent()
 
-        # Now, place the form immediately below the vertical spacer
-        gridLayout.addWidget(self.addPasswordFormWidget, 1, 1, 1, 1)  # Adjust grid placement as needed
-
-        # Top-right corner spacer to maintain grid shape (if still necessary)
-        gridLayout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 2)
+    def setupTopBar(self):
+        self.topBarLayout = QHBoxLayout()
+        titleLabel = QLabel("Credentials Cachers")
+        searchLineEdit = QLineEdit("Search...")
+        optionsButton = QPushButton("Options")
         
-        self.add_password_button.clicked.connect(self.toggle_add_password_form)
-        self.addPasswordFormWidget.setVisible(False)
+        self.topBarLayout.addWidget(titleLabel)
+        self.topBarLayout.addWidget(searchLineEdit)
+        self.topBarLayout.addWidget(optionsButton)
+        
+        self.mainLayout.addLayout(self.topBarLayout)
+
+    def setupMainContent(self):
+        self.mainContentLayout = QHBoxLayout()
+        self.setupLeftColumn()
+        self.setupCentralColumn()
+        self.setupRightColumn()
+        
+        self.mainLayout.addLayout(self.mainContentLayout)
+
+    def setupLeftColumn(self):
+        self.leftColumnLayout = QVBoxLayout()
+        allItemsButton = QPushButton("All Items")
+        favouritesButton = QPushButton("Favourites")
+        passwordGeneratorButton = QPushButton("Password Generator")
+        self.add_password_button = QPushButton("Add New Password")  # Define the button here
+        self.leftColumnLayout.addWidget(allItemsButton)
+        self.leftColumnLayout.addWidget(favouritesButton)
+        self.leftColumnLayout.addWidget(passwordGeneratorButton)
+        self.leftColumnLayout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.leftColumnLayout.addWidget(self.add_password_button)
+        
+        # Connect the add_new_password button to toggle the view
+        self.add_password_button.clicked.connect(lambda: self.toggle_add_password_form())
+        
+        return self.leftColumnLayout
+
+    def setupCentralColumn(self):
+        self.centralColumnLayout = QVBoxLayout()
+        passwordDisplayArea = QScrollArea()
+        passwordDisplayArea.setWidgetResizable(True)
+        scrollContent = QWidget()
+        scrollContent.setLayout(QVBoxLayout())
+        
+        passwordDisplayArea.setWidget(scrollContent)
+        self.centralColumnLayout.addWidget(passwordDisplayArea)
+        
+        self.mainContentLayout.addLayout(self.centralColumnLayout)
+
+    def setupRightColumn(self):
+        rightColumnLayout = QFormLayout()
+        nameLabel = QLabel("Name:")
+        nameLineEdit = QLineEdit()
+        usernameLabel = QLabel("Username:")
+        usernameLineEdit = QLineEdit()
+        rightColumnLayout.addRow(nameLabel, nameLineEdit)
+        rightColumnLayout.addRow(usernameLabel, usernameLineEdit)
+        return rightColumnLayout
+
+    def toggle_view(self, stackedWidget):
+        if stackedWidget.currentIndex() == 0:
+            stackedWidget.setCurrentIndex(1)
+        else:
+            stackedWidget.setCurrentIndex(0)
 
     def init_add_password_form(self):
-        """Initializes the 'Add Password' form."""
+        # The form now becomes a standalone QWidget that will be added to the stackedWidget
         self.addPasswordFormWidget = QWidget()
-        # Set the size policy for the form to be Preferred and Maximum, allowing it to shrink or expand as needed
-        self.addPasswordFormWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-
         formLayout = QFormLayout(self.addPasswordFormWidget)
-        formLayout.setVerticalSpacing(50)
 
-        # Initialize form fields.
+        # Initialize form fields
         self.website_name_entry = QLineEdit()
         self.website_url_entry = QLineEdit()
         self.username_entry = QLineEdit()
         self.password_entry = QLineEdit()
-        self.password_entry.setEchoMode(QLineEdit.Password)  # Mask input for password
         self.notes_entry = QLineEdit()
         self.submit_button = QPushButton("Submit")
 
-        # Add form fields to the layout.
+        # Set EchoMode for password entry
+        self.password_entry.setEchoMode(QLineEdit.Password)
+
+        # Add widgets to the form layout
         formLayout.addRow("Website Name", self.website_name_entry)
         formLayout.addRow("Website URL", self.website_url_entry)
         formLayout.addRow("Username", self.username_entry)
@@ -63,8 +106,14 @@ class VaultWidget(QWidget):
         formLayout.addRow("Notes", self.notes_entry)
         formLayout.addRow(self.submit_button)
 
-        # Connect the submit button to the action method.
+        # Connect the submit button's click signal to the slot that handles the submission
         self.submit_button.clicked.connect(self.submit_password_details)
+
+        # Since this form is meant to be toggled in place of the password display,
+        # you would add this widget to the stackedWidget.
+        # For simplicity, let's assume `self.stackedWidget` is already defined and is the QStackedWidget
+        # that contains both the password display area and the add password form.
+        self.stackedWidget.addWidget(self.addPasswordFormWidget)
 
     def toggle_add_password_form(self):
         """Toggles the visibility of the 'Add Password' form."""
@@ -104,9 +153,13 @@ class VaultWidget(QWidget):
         pass
 
     def adjustButtonWidth(self):
-        """Adjusts the width of the 'Add Password' button."""
-        buttonWidth = int(self.width() * 0.2)
-        self.add_password_button.setFixedWidth(buttonWidth)
+        """Dynamically adjusts the width of buttons."""
+        for layout in [self.leftColumnLayout]:  # Add other layouts as needed
+            for i in range(layout.count()):
+                widget = layout.itemAt(i).widget()
+                if isinstance(widget, QPushButton):
+                    buttonWidth = int(self.width() * 0.2)
+                    widget.setFixedWidth(buttonWidth)
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
@@ -132,6 +185,6 @@ class VaultWidget(QWidget):
         """)
 
     def resizeEvent(self, event):
-        """Handles the widget's resize event."""
+        """Handles the widget's resize event and adjusts button widths."""
         self.adjustButtonWidth()
-        super().resizeEvent(event)  # Call base class method to ensure proper event handling.
+        super().resizeEvent(event)
