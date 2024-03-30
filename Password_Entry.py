@@ -12,41 +12,37 @@ class PasswordEntryButton(QPushButton):
         self.initUI()
 
     def initUI(self):
-        # Assuming the database entries are tuples in the order of the SQL table columns
-        # e.g., (id, website_name, website_url, username, password, notes, created_at, updated_at)
         website_name = self.entry_data[1]  # Index 1 is website_name based on the SQL table structure
         self.setText(website_name)
-        # Connect the button's clicked signal to the display function
-        self.clicked.connect(lambda: self.display_function(self.entry_data))
+        self.clicked.connect(lambda: self.display_details())
         self.setCheckable(True)
-        # Apply the custom style
-        self.setStyle()
         self.setFocusPolicy(Qt.NoFocus)
-        
+        self.updateStyle(False)  # Initialize with the unselected style
 
-    def setStyle(self):
-        self.setStyleSheet("""
+    def updateStyle(self, isSelected):
+        baseStyle = """
             QPushButton {
                 border: 1px solid #a9a9a9;
                 border-radius: 20px;
                 padding: 10px;
-                background-color: #f0f0f0;
                 color: black;
                 text-align: left;
                 padding-left: 20px;
+                background-color: #ffffff; /* Default background color is white */
             }
             QPushButton:hover {
-                background-color: #e0e0e0;
+                background-color: #e0e0e0; /* Grey color when hovered */
             }
-            QPushButton:pressed, QPushButton:checked {
-                background-color: #F5C754;  /* Yellow color for the selected button */
-            }
-            QPushButton:focus {
-                border: 1px solid #a9a9a9; /* Attempt to maintain the same border style on focus */
-            }
-        """)
+        """
+        selectedStyle = "QPushButton { background-color: #F5C754; }"  # Yellow color for the selected button
+        
+        if isSelected:
+            self.setStyleSheet(baseStyle + selectedStyle)
+        else:
+            self.setStyleSheet(baseStyle)
 
     def display_details(self):
         # This method will be called when the button is clicked to display the entry details.
         # It will use the display function provided at initialization.
-        self.display_function(self.entry_data)
+        # Ensure to deselect any previously selected button and select the current one
+        self.display_function(self.entry_data, self)

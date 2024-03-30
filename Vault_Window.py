@@ -8,6 +8,7 @@ class VaultWidget(QWidget):
     def __init__(self, db, parent=None):
         super().__init__(parent)
         self.db = db
+        self.selectedButton = None  # Track the selected button
         self.initUI()
 
     def initUI(self):
@@ -242,16 +243,16 @@ class VaultWidget(QWidget):
             entries = self.db.fetch_all_entries()
         
         # Clear existing content in the vault display area
-        for i in reversed(range(self.scrollContentLayout.count())): 
-            widget = self.scrollContentLayout.itemAt(i).widget()
-            if widget is not None: 
-                widget.deleteLater()
+        while self.scrollContentLayout.count():
+            child = self.scrollContentLayout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
 
         # Add filtered or all entries to the vault
         for entry in entries:
             button = PasswordEntryButton(entry, self.display_entry_details)
             self.scrollContentLayout.addWidget(button)
-
+            
     def search_vault(self):
         search_query = self.searchLineEdit.text().lower()
         all_entries = self.db.fetch_all_entries()
@@ -260,9 +261,14 @@ class VaultWidget(QWidget):
         self.populate_vault(filtered_entries)
 
 
-    def display_entry_details(self, entry_data):
-        # This function will be responsible for displaying the details of a clicked entry
-        # Set the data in the right column QLineEdit widgets
+    def display_entry_details(self, entry_data, button):
+        if self.selectedButton:
+            self.selectedButton.updateStyle(False)  # Deselect the previous button
+        self.selectedButton = button  # Update the selected button
+        self.selectedButton.updateStyle(True)  # Highlight the new button
+
+        # Proceed to set the entry data in the right column QLineEdit widgets
+        # This part remains unchanged
         self.nameLineEdit.setText(entry_data[1])
         self.sitenameLineEdit.setText(entry_data[2])
         self.usernameLineEdit.setText(entry_data[3])
