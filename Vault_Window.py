@@ -108,8 +108,8 @@ class VaultWidget(QWidget):
     def setupRightColumn(self):
         self.rightColumnLayout = QVBoxLayout()
 
-        # Explicitly setting spacing and margins to see immediate effects
-        self.rightColumnLayout.setSpacing(50)  # Adjust this value as needed
+        # Explicitly setting spacing and margins for overall right column layout
+        self.rightColumnLayout.setSpacing(25)  # Adjust this value as needed for space between different rows
         self.rightColumnLayout.setContentsMargins(10, 10, 10, 10)
 
         # Name row setup
@@ -148,37 +148,29 @@ class VaultWidget(QWidget):
         sitenameRowLayout.addWidget(sitenameLabel)
         sitenameRowLayout.addWidget(self.sitenameLineEdit)
         
-        # Last updated label setup
-        lastUpdatedRowLayout = QHBoxLayout()
-        lastUpdatedLabel = QLabel("Last Updated:")
-        self.lastUpdatedLineEdit = QLineEdit()
-        self.lastUpdatedLineEdit.setMaximumWidth(160)
-        self.lastUpdatedLineEdit.setReadOnly(True)
-        lastUpdatedRowLayout.addWidget(lastUpdatedLabel)
-        lastUpdatedRowLayout.addWidget(self.lastUpdatedLineEdit)
+        self.lastUpdatedLabel = QLabel("Last Updated: Not available")  # Initial text
 
-        # Notes text box setup
+        # Notes section setup, with minimized spacing between label and text edit
+        notesLayout = QVBoxLayout()
+        notesLayout.setSpacing(10)  # No space between the label and the text edit
         notesLabel = QLabel("Notes:")
+        notesLayout.addWidget(notesLabel)
         self.notesTextEdit = QTextEdit()
         self.notesTextEdit.setReadOnly(True)
-        self.notesTextEdit.setMaximumHeight(100)  # Adjust height as needed
+        notesLayout.addWidget(self.notesTextEdit)
 
-        # Adding row layouts to the right column layout
+        # Adding row layouts and the notes section layout to the right column layout
         self.rightColumnLayout.addLayout(nameRowLayout)
         self.rightColumnLayout.addLayout(usernameRowLayout)
         self.rightColumnLayout.addLayout(passwordRowLayout)
         self.rightColumnLayout.addLayout(sitenameRowLayout)
-        self.rightColumnLayout.addLayout(lastUpdatedRowLayout)
-        self.rightColumnLayout.addWidget(notesLabel)
-        self.rightColumnLayout.addWidget(self.notesTextEdit)
+        self.rightColumnLayout.addWidget(self.lastUpdatedLabel)
+        self.rightColumnLayout.addLayout(notesLayout)
 
-
-        # Add stretch to push all content to the top
-        self.rightColumnLayout.addStretch(1)
-
+        # This stretch is removed to allow the notesTextEdit to take the remaining space.
         # Now add the rightColumnLayout to the main content layout
         self.mainContentLayout.addLayout(self.rightColumnLayout, 0)
-        
+            
 
     def toggle_view(self, stackedWidget):
         if stackedWidget.currentIndex() == 0:
@@ -287,13 +279,12 @@ class VaultWidget(QWidget):
         self.selectedButton.updateStyle(True)  # Highlight the new button
 
         # Proceed to set the entry data in the right column QLineEdit widgets
-        # This part remains unchanged
         self.nameLineEdit.setText(entry_data[1])
         self.sitenameLineEdit.setText(entry_data[2])
         self.usernameLineEdit.setText(entry_data[3])
         self.passwordLineEdit.setText(entry_data[4])
-        self.notesTextEdit.setText(entry_data[5])  # Assuming entry_data[5] contains the notes
-        self.lastUpdatedLineEdit.setText(entry_data[7])  # Assuming entry_data[6] contains the last updated timestamp
+        self.notesTextEdit.setText(entry_data[5])
+        self.lastUpdatedLabel.setText(f"Last Updated: {entry_data[7]}")
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
