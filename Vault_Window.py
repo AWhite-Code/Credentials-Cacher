@@ -74,12 +74,18 @@ class VaultWidget(QWidget):
         nameLineEdit = QLineEdit()
         usernameLabel = QLabel("Username:")
         usernameLineEdit = QLineEdit()
+        passwordLabel = QLabel("Password:")
+        passwordLineEdit = QLineEdit()
+        sitenameLabel = QLabel("Website:")
+        sitenameLineEdit = QLineEdit()
         
         # Using a QFormLayout for the form fields within the right column
         formLayout = QFormLayout()
         formLayout.addRow(nameLabel, nameLineEdit)
         formLayout.addRow(usernameLabel, usernameLineEdit)
-        
+        formLayout.addRow(passwordLabel, passwordLineEdit)
+        formLayout.addRow(sitenameLabel, sitenameLineEdit)
+    
         # Wrap formLayout in a container widget and add it to rightColumnLayout
         formContainer = QWidget()
         formContainer.setLayout(formLayout)
