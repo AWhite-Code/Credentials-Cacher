@@ -76,6 +76,9 @@ class VaultWidget(QWidget):
         # Add the password display area (vault view) to stackedWidget as the first view
         self.stackedWidget.addWidget(passwordDisplayArea)
         
+        # Hide the border
+        passwordDisplayArea.setStyleSheet("QScrollArea { border: none; } QScrollArea > QWidgetViewport { border: none; }")
+        
         # Call init_add_password_form to setup and add the Add Password Form as the second view
         self.init_add_password_form()
 
