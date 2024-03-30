@@ -12,15 +12,17 @@ class VaultWidget(QWidget):
     def initUI(self):
         # Main layout
         self.mainLayout = QVBoxLayout(self)
-        
         # Setup sublayouts
         self.setupTopBar()
         self.setupMainContent()
+        self.applyStylesheet()
+        self.stackedWidget.setCurrentIndex(0)
 
     def setupTopBar(self):
         self.topBarLayout = QHBoxLayout()
         titleLabel = QLabel("Credentials Cachers")
-        searchLineEdit = QLineEdit("Search...")
+        searchLineEdit = QLineEdit()
+        searchLineEdit.setPlaceholderText("Search...")
         optionsButton = QPushButton("Options")
         
         self.topBarLayout.addWidget(titleLabel)
@@ -31,10 +33,13 @@ class VaultWidget(QWidget):
 
     def setupMainContent(self):
         self.mainContentLayout = QHBoxLayout()
+        self.stackedWidget = QStackedWidget()  # This will toggle between the vault and the add password form
+
+        # Setup columns
         self.setupLeftColumn()
-        self.setupCentralColumn()
+        self.setupCentralColumn()  # Modify this to add the vault view and the add password form to stackedWidget
         self.setupRightColumn()
-        
+
         self.mainLayout.addLayout(self.mainContentLayout)
 
     def setupLeftColumn(self):
@@ -52,47 +57,98 @@ class VaultWidget(QWidget):
         # Connect the add_new_password button to toggle the view
         self.add_password_button.clicked.connect(lambda: self.toggle_add_password_form())
        
-        self.mainContentLayout.addLayout(self.leftColumnLayout)
+        self.mainContentLayout.addLayout(self.leftColumnLayout, 0)
         
 
     def setupCentralColumn(self):
         self.centralColumnLayout = QVBoxLayout()
+        
+        # Initialize the QStackedWidget
+        self.stackedWidget = QStackedWidget()
+        
+        # Set up the password display area
         passwordDisplayArea = QScrollArea()
         passwordDisplayArea.setWidgetResizable(True)
         scrollContent = QWidget()
         scrollContent.setLayout(QVBoxLayout())
-        
         passwordDisplayArea.setWidget(scrollContent)
-        self.centralColumnLayout.addWidget(passwordDisplayArea)
         
-        self.mainContentLayout.addLayout(self.centralColumnLayout)
+        # Add the password display area (vault view) to stackedWidget as the first view
+        self.stackedWidget.addWidget(passwordDisplayArea)
+        
+        # Call init_add_password_form to setup and add the Add Password Form as the second view
+        self.init_add_password_form()
+
+        # Ensure the vault view is the initial view
+        self.stackedWidget.setCurrentIndex(0)
+        
+        # Add the stackedWidget to the central column layout
+        self.centralColumnLayout.addWidget(self.stackedWidget)
+        
+        # Finally, add the centralColumnLayout to the main content layout
+        self.mainContentLayout.addLayout(self.centralColumnLayout, 1)
+
+    def init_add_password_form(self):
+        self.addPasswordFormWidget = QWidget()
+        formLayout = QFormLayout(self.addPasswordFormWidget)
+        # Set up form fields...
+        self.stackedWidget.addWidget(self.addPasswordFormWidget)
+
 
     def setupRightColumn(self):
         self.rightColumnLayout = QVBoxLayout()
         
+        # Name row setup
+        nameRowLayout = QHBoxLayout()
         nameLabel = QLabel("Name:")
         nameLineEdit = QLineEdit()
+        nameLineEdit.setMaximumWidth(200)
+        nameLineEdit.setReadOnly(True)
+        nameRowLayout.addStretch(1)  # Push everything to the right
+        nameRowLayout.addWidget(nameLabel)
+        nameRowLayout.addWidget(nameLineEdit)
+
+        # Username row setup
+        usernameRowLayout = QHBoxLayout()
         usernameLabel = QLabel("Username:")
         usernameLineEdit = QLineEdit()
+        usernameLineEdit.setMaximumWidth(200)
+        usernameLineEdit.setReadOnly(True)
+        usernameRowLayout.addStretch(1)  # Push everything to the right
+        usernameRowLayout.addWidget(usernameLabel)
+        usernameRowLayout.addWidget(usernameLineEdit)
+
+        # Password row setup
+        passwordRowLayout = QHBoxLayout()
         passwordLabel = QLabel("Password:")
         passwordLineEdit = QLineEdit()
+        passwordLineEdit.setMaximumWidth(200)
+        passwordLineEdit.setReadOnly(True)
+        passwordRowLayout.addStretch(1)  # Push everything to the right
+        passwordRowLayout.addWidget(passwordLabel)
+        passwordRowLayout.addWidget(passwordLineEdit)
+
+        # Website row setup
+        sitenameRowLayout = QHBoxLayout()
         sitenameLabel = QLabel("Website:")
         sitenameLineEdit = QLineEdit()
-        
-        # Using a QFormLayout for the form fields within the right column
-        formLayout = QFormLayout()
-        formLayout.addRow(nameLabel, nameLineEdit)
-        formLayout.addRow(usernameLabel, usernameLineEdit)
-        formLayout.addRow(passwordLabel, passwordLineEdit)
-        formLayout.addRow(sitenameLabel, sitenameLineEdit)
-    
-        # Wrap formLayout in a container widget and add it to rightColumnLayout
-        formContainer = QWidget()
-        formContainer.setLayout(formLayout)
-        self.rightColumnLayout.addWidget(formContainer)
-        
+        sitenameLineEdit.setMaximumWidth(200)
+        sitenameLineEdit.setReadOnly(True)
+        sitenameRowLayout.addStretch(1)  # Push everything to the right
+        sitenameRowLayout.addWidget(sitenameLabel)
+        sitenameRowLayout.addWidget(sitenameLineEdit)
+
+        # Add each row layout to the rightColumnLayout
+        self.rightColumnLayout.addLayout(nameRowLayout)
+        self.rightColumnLayout.addLayout(usernameRowLayout)
+        self.rightColumnLayout.addLayout(passwordRowLayout)
+        self.rightColumnLayout.addLayout(sitenameRowLayout)
+
+        # Adjust spacing between rows
+        self.rightColumnLayout.setSpacing(2)
+
         # Now add the rightColumnLayout to the main content layout
-        self.mainContentLayout.addLayout(self.rightColumnLayout)
+        self.mainContentLayout.addLayout(self.rightColumnLayout, 0)
 
     def toggle_view(self, stackedWidget):
         if stackedWidget.currentIndex() == 0:
@@ -101,20 +157,23 @@ class VaultWidget(QWidget):
             stackedWidget.setCurrentIndex(0)
 
     def init_add_password_form(self):
-        # The form now becomes a standalone QWidget that will be added to the stackedWidget
         self.addPasswordFormWidget = QWidget()
-        formLayout = QFormLayout(self.addPasswordFormWidget)
-
-        # Initialize form fields
+        # Create a QVBoxLayout for the form widget
+        verticalLayout = QVBoxLayout(self.addPasswordFormWidget)
+        
+        # Create a spacer item with a small height (e.g., 10 pixels) and add it to the vertical layout
+        spacer = QSpacerItem(20, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
+        verticalLayout.addSpacerItem(spacer)
+        
+        # Now create the form layout and add your form fields to this layout
+        formLayout = QFormLayout()
+        # Initialize form fields...
         self.website_name_entry = QLineEdit()
         self.website_url_entry = QLineEdit()
         self.username_entry = QLineEdit()
         self.password_entry = QLineEdit()
         self.notes_entry = QLineEdit()
         self.submit_button = QPushButton("Submit")
-
-        # Set EchoMode for password entry
-        self.password_entry.setEchoMode(QLineEdit.Password)
 
         # Add widgets to the form layout
         formLayout.addRow("Website Name", self.website_name_entry)
@@ -123,20 +182,23 @@ class VaultWidget(QWidget):
         formLayout.addRow("Password", self.password_entry)
         formLayout.addRow("Notes", self.notes_entry)
         formLayout.addRow(self.submit_button)
+        
+        # Add the form layout to the vertical layout
+        verticalLayout.addLayout(formLayout)
 
-        # Connect the submit button's click signal to the slot that handles the submission
-        self.submit_button.clicked.connect(self.submit_password_details)
+        # Adjust the spacing of the form layout if needed
+        formLayout.setSpacing(50)
 
-        # Since this form is meant to be toggled in place of the password display,
-        # you would add this widget to the stackedWidget.
-        # For simplicity, let's assume `self.stackedWidget` is already defined and is the QStackedWidget
-        # that contains both the password display area and the add password form.
+        # Add the form widget to the stackedWidget
         self.stackedWidget.addWidget(self.addPasswordFormWidget)
 
     def toggle_add_password_form(self):
-        """Toggles the visibility of the 'Add Password' form."""
-        isVisible = self.addPasswordFormWidget.isVisible()
-        self.addPasswordFormWidget.setVisible(not isVisible)
+        # Toggle between the vault view and the Add Password form
+        currentIndex = self.stackedWidget.currentIndex()
+        if currentIndex == 0:
+            self.stackedWidget.setCurrentIndex(1)  # Show Add Password form
+        else:
+            self.stackedWidget.setCurrentIndex(0)  # Show vault view
 
     def submit_password_details(self):
         """Handles the submission of password details."""
@@ -170,15 +232,6 @@ class VaultWidget(QWidget):
         """Initializes the display for password details. Placeholder for implementation."""
         pass
 
-    def adjustButtonWidth(self):
-        """Dynamically adjusts the width of buttons."""
-        for layout in [self.leftColumnLayout]:  # Add other layouts as needed
-            for i in range(layout.count()):
-                widget = layout.itemAt(i).widget()
-                if isinstance(widget, QPushButton):
-                    buttonWidth = int(self.width() * 0.2)
-                    widget.setFixedWidth(buttonWidth)
-
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
         self.setStyleSheet("""
@@ -201,6 +254,15 @@ class VaultWidget(QWidget):
             QPushButton:hover {background-color: #0053a6;}
             QPushButton:pressed {background-color: #00397a;}
         """)
+        
+    def adjustButtonWidth(self):
+        """Dynamically adjusts the width of buttons."""
+        for layout in [self.leftColumnLayout]:  # Add other layouts as needed
+            for i in range(layout.count()):
+                widget = layout.itemAt(i).widget()
+                if isinstance(widget, QPushButton):
+                    buttonWidth = int(self.width() * 0.2)
+                    widget.setFixedWidth(buttonWidth)
 
     def resizeEvent(self, event):
         """Handles the widget's resize event and adjusts button widths."""
