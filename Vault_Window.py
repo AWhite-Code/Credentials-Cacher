@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QApplication, QFrame, QSpacerItem, QSizePolicy, QStackedWidget
 )
 from PyQt5.QtCore import Qt
+from Password_Entry import PasswordEntryButton
 
 class VaultWidget(QWidget):
     def __init__(self, db, parent=None):
@@ -70,7 +71,8 @@ class VaultWidget(QWidget):
         passwordDisplayArea = QScrollArea()
         passwordDisplayArea.setWidgetResizable(True)
         scrollContent = QWidget()
-        scrollContent.setLayout(QVBoxLayout())
+        self.vaultLayout = QVBoxLayout(scrollContent)  # Define vaultLayout as a layout for scrollContent
+        
         passwordDisplayArea.setWidget(scrollContent)
         
         # Add the password display area (vault view) to stackedWidget as the first view
@@ -90,7 +92,9 @@ class VaultWidget(QWidget):
         
         # Finally, add the centralColumnLayout to the main content layout
         self.mainContentLayout.addLayout(self.centralColumnLayout, 1)
-
+        
+        self.populate_vault()
+        
     def init_add_password_form(self):
         self.addPasswordFormWidget = QWidget()
         formLayout = QFormLayout(self.addPasswordFormWidget)
@@ -226,14 +230,18 @@ class VaultWidget(QWidget):
         self.username_entry.clear()
         self.password_entry.clear()
         self.notes_entry.clear()
+    
+    def populate_vault(self):
+        entries = self.db.fetch_all_entries()
+        for entry in entries:
+            button = PasswordEntryButton(entry, self.display_entry_details)
+            self.vaultLayout.addWidget(button)
 
-    def update_entries_list(self):
-        """Updates the list of entries. Placeholder for implementation."""
-        pass
-
-    def init_password_details_display(self):
-        """Initializes the display for password details. Placeholder for implementation."""
-        pass
+    def display_entry_details(self, entry_data):
+        # This function will be responsible for displaying the details of a clicked entry
+        # Set the data in the right column QLineEdit widgets
+        self.nameLineEdit.setText(entry_data[1])
+        self.usernameLineEdit.setText(entry_data[3])
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
