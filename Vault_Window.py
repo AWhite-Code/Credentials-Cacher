@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QApplication, QFrame, QSpacerItem, QSizePolicy, QStackedWidget
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QApplication, QFrame, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit
 )
 from PyQt5.QtCore import Qt
 from Password_Entry import PasswordEntryButton
@@ -147,12 +147,31 @@ class VaultWidget(QWidget):
         self.sitenameLineEdit.setReadOnly(True)
         sitenameRowLayout.addWidget(sitenameLabel)
         sitenameRowLayout.addWidget(self.sitenameLineEdit)
+        
+        # Last updated label setup
+        lastUpdatedRowLayout = QHBoxLayout()
+        lastUpdatedLabel = QLabel("Last Updated:")
+        self.lastUpdatedLineEdit = QLineEdit()
+        self.lastUpdatedLineEdit.setMaximumWidth(160)
+        self.lastUpdatedLineEdit.setReadOnly(True)
+        lastUpdatedRowLayout.addWidget(lastUpdatedLabel)
+        lastUpdatedRowLayout.addWidget(self.lastUpdatedLineEdit)
+
+        # Notes text box setup
+        notesLabel = QLabel("Notes:")
+        self.notesTextEdit = QTextEdit()
+        self.notesTextEdit.setReadOnly(True)
+        self.notesTextEdit.setMaximumHeight(100)  # Adjust height as needed
 
         # Adding row layouts to the right column layout
         self.rightColumnLayout.addLayout(nameRowLayout)
         self.rightColumnLayout.addLayout(usernameRowLayout)
         self.rightColumnLayout.addLayout(passwordRowLayout)
         self.rightColumnLayout.addLayout(sitenameRowLayout)
+        self.rightColumnLayout.addLayout(lastUpdatedRowLayout)
+        self.rightColumnLayout.addWidget(notesLabel)
+        self.rightColumnLayout.addWidget(self.notesTextEdit)
+
 
         # Add stretch to push all content to the top
         self.rightColumnLayout.addStretch(1)
@@ -273,6 +292,8 @@ class VaultWidget(QWidget):
         self.sitenameLineEdit.setText(entry_data[2])
         self.usernameLineEdit.setText(entry_data[3])
         self.passwordLineEdit.setText(entry_data[4])
+        self.notesTextEdit.setText(entry_data[5])  # Assuming entry_data[5] contains the notes
+        self.lastUpdatedLineEdit.setText(entry_data[7])  # Assuming entry_data[6] contains the last updated timestamp
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
