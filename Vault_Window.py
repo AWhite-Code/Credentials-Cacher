@@ -59,42 +59,41 @@ class VaultWidget(QWidget):
         self.add_password_button.clicked.connect(lambda: self.toggle_add_password_form())
        
         self.mainContentLayout.addLayout(self.leftColumnLayout, 0)
-        
-
+            
     def setupCentralColumn(self):
         self.centralColumnLayout = QVBoxLayout()
-        
+
         # Initialize the QStackedWidget
         self.stackedWidget = QStackedWidget()
-        
+
         # Set up the password display area
         passwordDisplayArea = QScrollArea()
         passwordDisplayArea.setWidgetResizable(True)
         scrollContent = QWidget()
-        self.vaultLayout = QVBoxLayout(scrollContent)  # Define vaultLayout as a layout for scrollContent
-        
+        self.scrollContentLayout = QVBoxLayout(scrollContent)  # Use self to make it accessible elsewhere
+        self.scrollContentLayout.setAlignment(Qt.AlignTop)  # Ensure content starts from the top
+
+        passwordDisplayArea.setStyleSheet("QScrollArea { border: none; } QScrollArea > QWidgetViewport { border: none; }")
         passwordDisplayArea.setWidget(scrollContent)
-        
+
         # Add the password display area (vault view) to stackedWidget as the first view
         self.stackedWidget.addWidget(passwordDisplayArea)
-        
-        # Hide the border
-        passwordDisplayArea.setStyleSheet("QScrollArea { border: none; } QScrollArea > QWidgetViewport { border: none; }")
-        
+
         # Call init_add_password_form to setup and add the Add Password Form as the second view
         self.init_add_password_form()
 
         # Ensure the vault view is the initial view
         self.stackedWidget.setCurrentIndex(0)
-        
+
         # Add the stackedWidget to the central column layout
         self.centralColumnLayout.addWidget(self.stackedWidget)
-        
+
         # Finally, add the centralColumnLayout to the main content layout
         self.mainContentLayout.addLayout(self.centralColumnLayout, 1)
-        
+
+        # Populate the vault
         self.populate_vault()
-        
+            
     def init_add_password_form(self):
         self.addPasswordFormWidget = QWidget()
         formLayout = QFormLayout(self.addPasswordFormWidget)
@@ -135,11 +134,11 @@ class VaultWidget(QWidget):
         passwordRowLayout.addWidget(passwordLabel)
         passwordRowLayout.addWidget(self.passwordLineEdit)
 
-        # Website row setup
+        # Website  Address row setup
         sitenameRowLayout = QHBoxLayout()
         sitenameLabel = QLabel("Website:")
         self.sitenameLineEdit = QLineEdit()
-        self.sitenameLineEdit.setMaximumWidth(200)
+        self.sitenameLineEdit.setMaximumWidth(300)
         self.sitenameLineEdit.setReadOnly(True)
         sitenameRowLayout.addStretch(1)  # Push everything to the right
         sitenameRowLayout.addWidget(sitenameLabel)
@@ -152,7 +151,7 @@ class VaultWidget(QWidget):
         self.rightColumnLayout.addLayout(sitenameRowLayout)
 
         # Adjust spacing between rows
-        self.rightColumnLayout.setSpacing(2)
+        self.rightColumnLayout.setSpacing(1)
 
         # Now add the rightColumnLayout to the main content layout
         self.mainContentLayout.addLayout(self.rightColumnLayout, 0)
@@ -236,13 +235,17 @@ class VaultWidget(QWidget):
         entries = self.db.fetch_all_entries()
         for entry in entries:
             button = PasswordEntryButton(entry, self.display_entry_details)
-            self.vaultLayout.addWidget(button)
+            self.scrollContentLayout.addWidget(button)  # Add buttons to the layout
+
+
 
     def display_entry_details(self, entry_data):
         # This function will be responsible for displaying the details of a clicked entry
         # Set the data in the right column QLineEdit widgets
         self.nameLineEdit.setText(entry_data[1])
+        self.sitenameLineEdit.setText(entry_data[2])
         self.usernameLineEdit.setText(entry_data[3])
+        self.passwordLineEdit.setText(entry_data[4])
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
