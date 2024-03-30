@@ -108,42 +108,42 @@ class VaultWidget(QWidget):
         # Name row setup
         nameRowLayout = QHBoxLayout()
         nameLabel = QLabel("Name:")
-        nameLineEdit = QLineEdit()
-        nameLineEdit.setMaximumWidth(200)
-        nameLineEdit.setReadOnly(True)
+        self.nameLineEdit = QLineEdit()
+        self.nameLineEdit.setMaximumWidth(200)
+        self.nameLineEdit.setReadOnly(True)
         nameRowLayout.addStretch(1)  # Push everything to the right
         nameRowLayout.addWidget(nameLabel)
-        nameRowLayout.addWidget(nameLineEdit)
+        nameRowLayout.addWidget(self.nameLineEdit)
 
         # Username row setup
         usernameRowLayout = QHBoxLayout()
         usernameLabel = QLabel("Username:")
-        usernameLineEdit = QLineEdit()
-        usernameLineEdit.setMaximumWidth(200)
-        usernameLineEdit.setReadOnly(True)
+        self.usernameLineEdit = QLineEdit()
+        self.usernameLineEdit.setMaximumWidth(200)
+        self.usernameLineEdit.setReadOnly(True)
         usernameRowLayout.addStretch(1)  # Push everything to the right
         usernameRowLayout.addWidget(usernameLabel)
-        usernameRowLayout.addWidget(usernameLineEdit)
+        usernameRowLayout.addWidget(self.usernameLineEdit)
 
         # Password row setup
         passwordRowLayout = QHBoxLayout()
         passwordLabel = QLabel("Password:")
-        passwordLineEdit = QLineEdit()
-        passwordLineEdit.setMaximumWidth(200)
-        passwordLineEdit.setReadOnly(True)
+        self.passwordLineEdit = QLineEdit()
+        self.passwordLineEdit.setMaximumWidth(200)
+        self.passwordLineEdit.setReadOnly(True)
         passwordRowLayout.addStretch(1)  # Push everything to the right
         passwordRowLayout.addWidget(passwordLabel)
-        passwordRowLayout.addWidget(passwordLineEdit)
+        passwordRowLayout.addWidget(self.passwordLineEdit)
 
         # Website row setup
         sitenameRowLayout = QHBoxLayout()
         sitenameLabel = QLabel("Website:")
-        sitenameLineEdit = QLineEdit()
-        sitenameLineEdit.setMaximumWidth(200)
-        sitenameLineEdit.setReadOnly(True)
+        self.sitenameLineEdit = QLineEdit()
+        self.sitenameLineEdit.setMaximumWidth(200)
+        self.sitenameLineEdit.setReadOnly(True)
         sitenameRowLayout.addStretch(1)  # Push everything to the right
         sitenameRowLayout.addWidget(sitenameLabel)
-        sitenameRowLayout.addWidget(sitenameLineEdit)
+        sitenameRowLayout.addWidget(self.sitenameLineEdit)
 
         # Add each row layout to the rightColumnLayout
         self.rightColumnLayout.addLayout(nameRowLayout)
@@ -181,6 +181,7 @@ class VaultWidget(QWidget):
         self.password_entry = QLineEdit()
         self.notes_entry = QLineEdit()
         self.submit_button = QPushButton("Submit")
+        self.submit_button.clicked.connect(self.submit_password_details)
 
         # Add widgets to the form layout
         formLayout.addRow("Website Name", self.website_name_entry)
