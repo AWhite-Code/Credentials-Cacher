@@ -51,8 +51,9 @@ class VaultWidget(QWidget):
         
         # Connect the add_new_password button to toggle the view
         self.add_password_button.clicked.connect(lambda: self.toggle_add_password_form())
+       
+        self.mainContentLayout.addLayout(self.leftColumnLayout)
         
-        return self.leftColumnLayout
 
     def setupCentralColumn(self):
         self.centralColumnLayout = QVBoxLayout()
@@ -67,14 +68,25 @@ class VaultWidget(QWidget):
         self.mainContentLayout.addLayout(self.centralColumnLayout)
 
     def setupRightColumn(self):
-        rightColumnLayout = QFormLayout()
+        self.rightColumnLayout = QVBoxLayout()
+        
         nameLabel = QLabel("Name:")
         nameLineEdit = QLineEdit()
         usernameLabel = QLabel("Username:")
         usernameLineEdit = QLineEdit()
-        rightColumnLayout.addRow(nameLabel, nameLineEdit)
-        rightColumnLayout.addRow(usernameLabel, usernameLineEdit)
-        return rightColumnLayout
+        
+        # Using a QFormLayout for the form fields within the right column
+        formLayout = QFormLayout()
+        formLayout.addRow(nameLabel, nameLineEdit)
+        formLayout.addRow(usernameLabel, usernameLineEdit)
+        
+        # Wrap formLayout in a container widget and add it to rightColumnLayout
+        formContainer = QWidget()
+        formContainer.setLayout(formLayout)
+        self.rightColumnLayout.addWidget(formContainer)
+        
+        # Now add the rightColumnLayout to the main content layout
+        self.mainContentLayout.addLayout(self.rightColumnLayout)
 
     def toggle_view(self, stackedWidget):
         if stackedWidget.currentIndex() == 0:
