@@ -260,26 +260,27 @@ class VaultWidget(QWidget):
         self.notes_entry.clear()
     
     def populate_vault(self, entries=None):
-        """
-        Fetch and display entries using the current encryption key. If entries
-        are provided, it uses those instead (useful for displaying search results).
-        """
+        """Fetch and display entries using the current encryption key."""
+        if self.encryption_key is not None:
+            entries = self.db.fetch_all_entries(self.encryption_key)
+        else:
+            entries = []  # If no encryption key, clear or handle accordingly
+
         # Clear existing content in the vault display area
         while self.scrollContentLayout.count():
             child = self.scrollContentLayout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
-        # If no entries are provided, fetch all
-        if entries is None and self.encryption_key is not None:
-            entries = self.db.fetch_all_entries(self.encryption_key)
-        elif entries is None:
-            # No entries to display (e.g., no encryption key available)
-            entries = []
-
-        # Add filtered or all entries to the vault
+        # Populate the vault with entries
         for entry in entries:
-            button = PasswordEntryButton(entry, self.display_entry_details)
+            # Instantiate PasswordEntryButton without directly passing the display_function
+            button = PasswordEntryButton(entry)
+            # Connect the displayDetails signal to the display_entry_details method
+            button.displayDetails.connect(self.display_entry_details)
+            # Optionally, connect editClicked and deleteClicked signals as needed
+            # button.editClicked.connect(some_edit_method)
+            # button.deleteClicked.connect(some_delete_method)
             self.scrollContentLayout.addWidget(button)
             
     def search_vault(self):
@@ -299,18 +300,23 @@ class VaultWidget(QWidget):
 
 
     def display_entry_details(self, entry_data, button):
-        if self.selectedButton:
-            self.selectedButton.updateStyle(False)  # Deselect the previous button
-        self.selectedButton = button  # Update the selected button
-        self.selectedButton.updateStyle(True)  # Highlight the new button
+        # Deselect the previously selected button, if any
+        if self.selectedButton is not None:
+            # Ensure the previously selected button's style is reset
+            self.selectedButton.setSelected(False)
 
-        # Proceed to set the entry data in the right column QLineEdit widgets
+        # Update the selectedButton reference to the new button
+        self.selectedButton = button
+        # Mark the new button as selected
+        self.selectedButton.setSelected(True)
+
+        # Set the entry details in the UI based on entry_data
         self.nameLineEdit.setText(entry_data[1])
-        self.sitenameLineEdit.setText(entry_data[2])
-        self.usernameLineEdit.setText(entry_data[3])
-        self.passwordLineEdit.setText(entry_data[4])
-        self.notesTextEdit.setText(entry_data[5])
-        self.lastUpdatedLabel.setText(f"Last Updated: {entry_data[7]}")
+        self.sitenameLineEdit.setText(entry_data[2] if len(entry_data) > 2 else "")
+        self.usernameLineEdit.setText(entry_data[3] if len(entry_data) > 3 else "")
+        self.passwordLineEdit.setText(entry_data[4] if len(entry_data) > 4 else "")
+        self.notesTextEdit.setText(entry_data[5] if len(entry_data) > 5 else "")
+        self.lastUpdatedLabel.setText(f"Last Updated: {entry_data[7]}" if len(entry_data) > 7 else "")
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""
