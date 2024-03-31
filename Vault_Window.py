@@ -328,7 +328,7 @@ class VaultWidget(QWidget):
                 border: 2px solid #a9a9a9;
                 border-radius: 15px;
                 padding: 5px;
-                background-color: #0078d7;
+                background-color: #F5C754;
                 color: white;
             }
             QPushButton:hover {background-color: #0053a6;}
