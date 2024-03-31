@@ -82,10 +82,10 @@ class Database:
         for entry in encrypted_entries:
             id, encrypted_website_name, encrypted_website_url, encrypted_username, encrypted_password, encrypted_notes, created_at, updated_at = entry
 
-            logging.debug(f"Attempting to decrypt website name: {encrypted_website_name}")
+            #logging.debug(f"Attempting to decrypt website name: {encrypted_website_name}")
             website_name = Encryption.decrypt_data(encrypted_website_name, encryption_key) if encrypted_website_name else None
 
-            logging.debug(f"Attempting to decrypt website URL: {encrypted_website_url}")
+            #logging.debug(f"Attempting to decrypt website URL: {encrypted_website_url}")
             website_url = Encryption.decrypt_data(encrypted_website_url, encryption_key) if encrypted_website_url else None
             
             username = Encryption.decrypt_data(encrypted_username, encryption_key)

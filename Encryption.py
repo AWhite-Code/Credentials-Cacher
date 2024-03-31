@@ -36,21 +36,21 @@ class Encryption:
             'nonce': base64.b64encode(nonce).decode('utf-8'),
             'tag': base64.b64encode(tag).decode('utf-8'),
         })
-        logging.debug(f"Serialized encrypted data: {encrypted_data}")
+        #logging.debug(f"Serialized encrypted data: {encrypted_data}")
         return encrypted_data
 
     @staticmethod
     def decrypt_data(encrypted: str, key: bytes) -> str:
         try:
-            logging.debug(f"Encrypted data received for decryption: {encrypted}")
+            #logging.debug(f"Encrypted data received for decryption: {encrypted}")
             encrypted_dict = json.loads(encrypted)
             nonce = base64.b64decode(encrypted_dict['nonce'])
             tag = base64.b64decode(encrypted_dict['tag'])
             ciphertext = base64.b64decode(encrypted_dict['ciphertext'])
             cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
             plaintext = cipher.decrypt_and_verify(ciphertext, tag)
-            logging.debug(f"Decrypted data: {plaintext.decode()}")
+            #logging.debug(f"Decrypted data: {plaintext.decode()}")
             return plaintext.decode()
         except (ValueError, KeyError) as e:
-            logging.error(f"Decryption failed: {e}")
+            #logging.error(f"Decryption failed: {e}")
             raise ValueError("Decryption failed due to incorrect key or tampering.")

@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from Password_Entry import PasswordEntryButton
+import logging
 
 class VaultWidget(QWidget):
     def __init__(self, db, parent=None):
@@ -259,19 +260,24 @@ class VaultWidget(QWidget):
         self.notes_entry.clear()
     
     def populate_vault(self, entries=None):
-        """Fetch and display entries using the current encryption key."""
-        if self.encryption_key is not None:
-            entries = self.db.fetch_all_entries(self.encryption_key)
-        else:
-            entries = []  # If no encryption key, clear or handle accordingly
-
+        """
+        Fetch and display entries using the current encryption key. If entries
+        are provided, it uses those instead (useful for displaying search results).
+        """
         # Clear existing content in the vault display area
         while self.scrollContentLayout.count():
             child = self.scrollContentLayout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
-        # Populate the vault with entries
+        # If no entries are provided, fetch all
+        if entries is None and self.encryption_key is not None:
+            entries = self.db.fetch_all_entries(self.encryption_key)
+        elif entries is None:
+            # No entries to display (e.g., no encryption key available)
+            entries = []
+
+        # Add filtered or all entries to the vault
         for entry in entries:
             button = PasswordEntryButton(entry, self.display_entry_details)
             self.scrollContentLayout.addWidget(button)
@@ -280,11 +286,16 @@ class VaultWidget(QWidget):
         """Filter and display entries based on the search query using the current encryption key."""
         if self.encryption_key:
             search_query = self.searchLineEdit.text().lower()
-            all_entries = self.db.fetch_all_entries(self.encryption_key)  # Adjust for encryption
+            #logging.debug(f"Search query received: '{search_query}'")
+
+            all_entries = self.db.fetch_all_entries(self.encryption_key)
             filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
+
+            #logging.debug(f"Filtered entries based on search query '{search_query}': {filtered_entries}")
             self.populate_vault(filtered_entries)
         else:
-            self.populate_vault([])  # If no encryption key, clear or handle accordingly
+            self.populate_vault([])  # Clear the display if there's no encryption key
+
 
 
     def display_entry_details(self, entry_data, button):
