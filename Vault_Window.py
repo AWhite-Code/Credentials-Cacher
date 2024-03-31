@@ -12,6 +12,7 @@ class VaultWidget(QWidget):
         self.selectedButton = None  # Track the selected button
         self.encryption_key = None
         self.initUI()
+        self.current_edit_id = None  # None indicates "add mode"
         
     def set_encryption_key(self, key):
         self.encryption_key = key
@@ -228,30 +229,41 @@ class VaultWidget(QWidget):
             self.stackedWidget.setCurrentIndex(1)  # Show Add Password form
         else:
             self.stackedWidget.setCurrentIndex(0)  # Show vault view
-
+            
     def submit_password_details(self):
-        """Handles the submission of password details."""
-        # Collect data from form fields.
+        """Handles the submission of password details for both adding new and updating existing entries."""
         website_name = self.website_name_entry.text()
         website_url = self.website_url_entry.text()
         username = self.username_entry.text()
         password = self.password_entry.text()
         notes = self.notes_entry.text()
 
-        # Ensure that the encryption key is available before trying to add the entry
+        # Ensure that the encryption key is available before proceeding
         if self.encryption_key is not None:
-            # Insert data into the database using the encryption key.
-            self.db.add_password_entry(website_name, website_url, username, password, notes, self.encryption_key)
-            
-            # Clear form fields and refresh the vault display.
-            self.clear_form_fields()
-            self.populate_vault()
-            # Toggle back to the vault view
-            self.stackedWidget.setCurrentIndex(0)  # Assumes the vault view is at index 0
+            try:
+                if self.current_edit_id is not None:
+                    # Update existing entry
+                    self.db.update_password_entry(self.current_edit_id, website_name, website_url, username, password, notes, self.encryption_key)
+                    print("Entry updated successfully.")
+                else:
+                    # Add new entry
+                    self.db.add_password_entry(website_name, website_url, username, password, notes, self.encryption_key)
+                    print("Entry added successfully.")
+
+                # Clear form fields and refresh the vault display, toggling back to the vault view
+                self.clear_form_fields()
+                self.populate_vault()
+                self.stackedWidget.setCurrentIndex(0)  # Assumes the vault view is at index 0
+            except Exception as e:
+                # Log the error or inform the user about the failure
+                print(f"Failed to process entry: {e}")
         else:
-            # Handle the scenario where encryption key is not available.
-            # This could involve displaying an error message to the user.
-            print("Encryption key is not available. Cannot add the entry.")
+            # Handle the scenario where the encryption key is not available
+            print("Encryption key is not available. Cannot process the entry.")
+
+        # Reset the current_edit_id to None to ensure the form is back in "add mode"
+        self.current_edit_id = None
+
 
     def clear_form_fields(self):
         """Clears all input fields in the form."""
@@ -263,6 +275,11 @@ class VaultWidget(QWidget):
     
     def populate_vault(self, entries=None):
         """Fetch and display entries using the current encryption key."""
+        # Deselect and reset the currently selected button, if any
+        if self.selectedButton:
+            self.selectedButton.setSelected(False)
+            self.selectedButton = None
+
         # Clear existing content in the vault display area
         while self.scrollContentLayout.count():
             child = self.scrollContentLayout.takeAt(0)
@@ -279,20 +296,19 @@ class VaultWidget(QWidget):
         for entry in entries:
             button = PasswordEntryButton(entry)
             button.displayDetails.connect(self.display_entry_details)
-            # Optionally, connect editClicked and deleteClicked signals as needed
+            # Connect deleteClicked signal to deleteEntry method
+            button.deleteClicked.connect(lambda entry_data=entry: self.deleteEntry(entry_data))
+            button.editClicked.connect(self.enter_Edit_Mode)
             self.scrollContentLayout.addWidget(button)
             
     def search_vault(self):
         """Filter and display entries based on the search query using the current encryption key."""
         if self.encryption_key:
             search_query = self.searchLineEdit.text().lower()
-            print(f"Search query received: '{search_query}'")  # Debugging output
 
             all_entries = self.db.fetch_all_entries(self.encryption_key)
-            print(f"All entries: {all_entries}")  # Debugging output
 
             filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
-            print(f"Filtered entries based on search query '{search_query}': {filtered_entries}")  # Debugging output
 
             self.populate_vault(filtered_entries)
         else:
@@ -371,3 +387,15 @@ class VaultWidget(QWidget):
             self.search_vault()
         else:
             self.populate_vault()
+            
+    def enter_Edit_Mode(self, entry_data):
+        """Prepares and shows the add/edit form with pre-filled entry data for editing."""
+        self.website_name_entry.setText(entry_data[1])
+        self.website_url_entry.setText(entry_data[2])
+        self.username_entry.setText(entry_data[3])
+        self.password_entry.setText(entry_data[4])
+        self.notes_entry.setText(entry_data[5])
+        # Assuming entry_data[0] is the ID
+        self.current_edit_id = entry_data[0]
+        # Switch to the add/edit form view
+        self.stackedWidget.setCurrentIndex(1)

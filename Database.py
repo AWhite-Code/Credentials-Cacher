@@ -104,3 +104,18 @@ class Database:
     def close_connection(self):
         if self.connection:
             self.connection.close()
+            
+    def update_password_entry(self, id, website_name, website_url, username, password, notes, encryption_key):
+        """Updates an existing password entry in the database."""
+        # Assume encryption and SQL UPDATE statement are similar to add_password_entry
+        encrypted_website_name = Encryption.encrypt_data(website_name, encryption_key)
+        encrypted_website_url = Encryption.encrypt_data(website_url, encryption_key)
+        encrypted_username = Encryption.encrypt_data(username, encryption_key)
+        encrypted_password = Encryption.encrypt_data(password, encryption_key)
+        encrypted_notes = Encryption.encrypt_data(notes, encryption_key)
+        
+        cursor = self.connection.cursor()
+        query = """UPDATE vault SET website_name = ?, website_url = ?, username = ?, password = ?, notes = ?
+                   WHERE id = ?;"""
+        cursor.execute(query, (encrypted_website_name, encrypted_website_url, encrypted_username, encrypted_password, encrypted_notes, id))
+        self.connection.commit()
