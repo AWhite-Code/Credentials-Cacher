@@ -113,7 +113,8 @@ class PasswordEntryButton(QWidget):
         self.displayDetails.emit(self.entry_data, self)
 
     def onDeleteClicked(self, event):
-        self.displayDetails.emit(self.entry_data, self)
+        self.deleteClicked.emit(self.entry_data)
+        
 
     def setSelected(self, isSelected):
         self.editIcon.setVisible(isSelected)

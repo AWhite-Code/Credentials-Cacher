@@ -51,6 +51,11 @@ class Database:
         """
         cursor.execute(table_creation_query)
         self.connection.commit()
+        
+    def delete_password_entry(self, entry_id):
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM vault WHERE id = ?", (entry_id,))
+        self.connection.commit()
 
     def add_password_entry(self, website_name, website_url, username, password, notes, encryption_key):
         # Encrypt each piece of data and serialize it

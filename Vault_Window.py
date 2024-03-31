@@ -261,41 +261,41 @@ class VaultWidget(QWidget):
     
     def populate_vault(self, entries=None):
         """Fetch and display entries using the current encryption key."""
-        if self.encryption_key is not None:
-            entries = self.db.fetch_all_entries(self.encryption_key)
-        else:
-            entries = []  # If no encryption key, clear or handle accordingly
-
         # Clear existing content in the vault display area
         while self.scrollContentLayout.count():
             child = self.scrollContentLayout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
-        # Populate the vault with entries
+        # If no specific entries are provided, fetch all
+        if entries is None and self.encryption_key:
+            entries = self.db.fetch_all_entries(self.encryption_key)
+        elif not self.encryption_key:
+            entries = []  # Clear or handle accordingly if no encryption key
+
+        # Populate the vault with the provided or fetched entries
         for entry in entries:
-            # Instantiate PasswordEntryButton without directly passing the display_function
             button = PasswordEntryButton(entry)
-            # Connect the displayDetails signal to the display_entry_details method
             button.displayDetails.connect(self.display_entry_details)
             # Optionally, connect editClicked and deleteClicked signals as needed
-            # button.editClicked.connect(some_edit_method)
-            # button.deleteClicked.connect(some_delete_method)
             self.scrollContentLayout.addWidget(button)
             
     def search_vault(self):
         """Filter and display entries based on the search query using the current encryption key."""
         if self.encryption_key:
             search_query = self.searchLineEdit.text().lower()
-            #logging.debug(f"Search query received: '{search_query}'")
+            print(f"Search query received: '{search_query}'")  # Debugging output
 
             all_entries = self.db.fetch_all_entries(self.encryption_key)
-            filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
+            print(f"All entries: {all_entries}")  # Debugging output
 
-            #logging.debug(f"Filtered entries based on search query '{search_query}': {filtered_entries}")
+            filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
+            print(f"Filtered entries based on search query '{search_query}': {filtered_entries}")  # Debugging output
+
             self.populate_vault(filtered_entries)
         else:
             self.populate_vault([])  # Clear the display if there's no encryption key
+
 
 
 
@@ -355,3 +355,17 @@ class VaultWidget(QWidget):
         """Handles the widget's resize event and adjusts button widths."""
         self.adjustButtonWidth()
         super().resizeEvent(event)
+        
+        
+    def deleteEntry(self, entry_data):
+        # Extract the id or unique identifier from entry_data
+        entry_id = entry_data[0]  # Assuming entry_data[0] is the unique id of the entry in the database
+
+        # Execute SQL statement to delete the entry from the database
+        self.db.delete_password_entry(entry_id)
+
+        # Refresh the vault view. If there's a search term, refresh the search; otherwise, refresh the entire vault.
+        if self.searchLineEdit.text():
+            self.search_vault()
+        else:
+            self.populate_vault()
