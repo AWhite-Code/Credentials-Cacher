@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication
 from Window import MainWindow
 from Database import Database
+import logging
 
 def main():
     db = Database()
@@ -10,4 +11,6 @@ def main():
     app.exec_()  # Start the application's event loop
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()
+    

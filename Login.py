@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 import pickle
 from Hashing import Hashing
-from Vault_Window import VaultWidget
+from Encryption import Encryption
+import os
 
 class LoginWidget(QWidget):
     def __init__(self, on_show_other_frame, main_window, parent=None):
@@ -79,14 +80,20 @@ class LoginWidget(QWidget):
         self.on_show_other_frame()
 
     def login_action(self):
-        username = self.username_entry.text()
-        password = self.password_entry.text()
+            username = self.username_entry.text()
+            password = self.password_entry.text()
 
-        # Validate the login information
-        if self.validate_login(username, password):
-             self.main_window.stacked_widgets.setCurrentWidget(self.main_window.vault_widget)
-        else:
-            QMessageBox.warning(self, "Login Failed", "The username or password is incorrect.")
+            if self.validate_login(username, password):
+                # Derive the encryption key from the master password and global salt for the session
+                global_salt = self.get_global_salt()
+                encryption_key = Encryption.derive_key(password.encode(), global_salt)
+                
+                # Store the derived encryption key in the main window for use in cryptographic operations
+                self.main_window.set_encryption_key(encryption_key)                
+                self.main_window.stacked_widgets.setCurrentWidget(self.main_window.vault_widget)
+            else:
+                QMessageBox.warning(self, "Login Failed", "The username or password is incorrect.")
+
 
     def validate_login(self, username, password):
         try:
@@ -99,3 +106,13 @@ class LoginWidget(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
         return False
+
+    def get_global_salt(self):
+        # Load the global salt from a predefined location
+        salt_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'global_salt.bin')
+        try:
+            with open(salt_path, 'rb') as salt_file:
+                return salt_file.read()
+        except FileNotFoundError:
+            QMessageBox.critical(self, "Error", "Global salt file not found.")
+            return None

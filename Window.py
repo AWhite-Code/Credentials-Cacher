@@ -10,7 +10,7 @@ class MainWindow(QMainWindow):
     def __init__(self, db):
         super().__init__()
         self.db = db  # Save the db instance for later use
-        self.vault_widget = VaultWidget(self.db)
+        self.encryption_key = None  # New attribute for storing the encryption key
         
         self.setWindowTitle("Credentials Cacher")
         
@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         # Initialize widgets
         self.login_widget = LoginWidget(self.toggle_widgets, self)
         self.registration_widget = RegistrationWidget(self.toggle_widgets)
-        self.vault_widget = VaultWidget(db)
+        self.vault_widget = VaultWidget(self.db, parent=self)
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)
@@ -55,8 +55,15 @@ class MainWindow(QMainWindow):
                 return False
         return False
     
-    # Ensure the database connected is severed to prevent data sitting in memory
-    # This may be overkill for the scope of the project as memory manipulation is kinda sophisticated
+    def set_encryption_key(self, key):
+        self.encryption_key = key
+        self.vault_widget.set_encryption_key(key)  # Pass the key to VaultWidget
+
+    def clear_encryption_key(self):
+        self.encryption_key = None
+        self.vault_widget.set_encryption_key(None)  # Inform VaultWidget to clear the key
+
     def closeEvent(self, event):
         self.db.close_connection()
+        self.clear_encryption_key()  # Ensure the encryption key is cleared when the application closes
         event.accept()  # Close the PYQT window normally

@@ -9,7 +9,12 @@ class VaultWidget(QWidget):
         super().__init__(parent)
         self.db = db
         self.selectedButton = None  # Track the selected button
+        self.encryption_key = None
         self.initUI()
+        
+    def set_encryption_key(self, key):
+        self.encryption_key = key
+        self.populate_vault()  # Repopulate the vault with the encryption key    
 
     def initUI(self):
         # Main layout
@@ -98,11 +103,11 @@ class VaultWidget(QWidget):
         # Populate the vault
         self.populate_vault()
             
-    def init_add_password_form(self):
+    """def init_add_password_form(self):
         self.addPasswordFormWidget = QWidget()
         formLayout = QFormLayout(self.addPasswordFormWidget)
         # Set up form fields...
-        self.stackedWidget.addWidget(self.addPasswordFormWidget)
+        self.stackedWidget.addWidget(self.addPasswordFormWidget)"""
 
 
     def setupRightColumn(self):
@@ -232,14 +237,18 @@ class VaultWidget(QWidget):
         password = self.password_entry.text()
         notes = self.notes_entry.text()
 
-        # Insert data into the database.
-        self.db.add_password_entry(website_name, website_url, username, password, notes)
-
-        # Clear form fields and hide the form.
-        self.clear_form_fields()
-        self.toggle_add_password_form()
-        
-        self.populate_vault()
+        # Ensure that the encryption key is available before trying to add the entry
+        if self.encryption_key is not None:
+            # Insert data into the database using the encryption key.
+            self.db.add_password_entry(website_name, website_url, username, password, notes, self.encryption_key)
+            
+            # Clear form fields and refresh the vault display.
+            self.clear_form_fields()
+            self.populate_vault()
+        else:
+            # Handle the scenario where encryption key is not available.
+            # This could involve displaying an error message to the user.
+            print("Encryption key is not available. Cannot add the entry.")
 
     def clear_form_fields(self):
         """Clears all input fields in the form."""
@@ -250,26 +259,32 @@ class VaultWidget(QWidget):
         self.notes_entry.clear()
     
     def populate_vault(self, entries=None):
-        if entries is None:
-            entries = self.db.fetch_all_entries()
-        
+        """Fetch and display entries using the current encryption key."""
+        if self.encryption_key is not None:
+            entries = self.db.fetch_all_entries(self.encryption_key)
+        else:
+            entries = []  # If no encryption key, clear or handle accordingly
+
         # Clear existing content in the vault display area
         while self.scrollContentLayout.count():
             child = self.scrollContentLayout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
-        # Add filtered or all entries to the vault
+        # Populate the vault with entries
         for entry in entries:
             button = PasswordEntryButton(entry, self.display_entry_details)
             self.scrollContentLayout.addWidget(button)
             
     def search_vault(self):
-        search_query = self.searchLineEdit.text().lower()
-        all_entries = self.db.fetch_all_entries()
-        filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
-
-        self.populate_vault(filtered_entries)
+        """Filter and display entries based on the search query using the current encryption key."""
+        if self.encryption_key:
+            search_query = self.searchLineEdit.text().lower()
+            all_entries = self.db.fetch_all_entries(self.encryption_key)  # Adjust for encryption
+            filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
+            self.populate_vault(filtered_entries)
+        else:
+            self.populate_vault([])  # If no encryption key, clear or handle accordingly
 
 
     def display_entry_details(self, entry_data, button):

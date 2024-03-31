@@ -8,3 +8,6 @@ credentials.bin
 # Dev tools:
 db_wipe.py
 test_encryption.py
+
+# Testing log
+app.log
