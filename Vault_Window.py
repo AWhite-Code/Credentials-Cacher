@@ -246,6 +246,8 @@ class VaultWidget(QWidget):
             # Clear form fields and refresh the vault display.
             self.clear_form_fields()
             self.populate_vault()
+            # Toggle back to the vault view
+            self.stackedWidget.setCurrentIndex(0)  # Assumes the vault view is at index 0
         else:
             # Handle the scenario where encryption key is not available.
             # This could involve displaying an error message to the user.
