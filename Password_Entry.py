@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QLabel
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QPixmap, QCursor
 
 class PasswordEntryButton(QWidget):
@@ -20,15 +20,26 @@ class PasswordEntryButton(QWidget):
         self.button.setCheckable(True)
         self.button.setFocusPolicy(Qt.NoFocus)
 
+        # Scale factor to determine icon size as a fraction of button height
+        scaleFactor = 0.5
+
+        # Calculate icon size based on button height and scale factor
+        iconSize = QSize(int(self.button.sizeHint().height() * scaleFactor),
+                        int(self.button.sizeHint().height() * scaleFactor))
+
         self.editIcon = QLabel(self)
-        self.editIcon.setPixmap(QPixmap('Icons/edit.png'))
+        editPixmap = QPixmap('Icons/edit.png').scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.editIcon.setPixmap(editPixmap)
         self.editIcon.hide()
-        self.editIcon.setCursor(QCursor(Qt.PointingHandCursor))  # Set cursor
+        self.editIcon.setCursor(QCursor(Qt.PointingHandCursor))
+        self.editIcon.setToolTip("Edit")  # Set tooltip for edit icon
 
         self.deleteIcon = QLabel(self)
-        self.deleteIcon.setPixmap(QPixmap('Icons/delete.png'))
+        deletePixmap = QPixmap('Icons/delete.png').scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.deleteIcon.setPixmap(deletePixmap)
         self.deleteIcon.hide()
-        self.deleteIcon.setCursor(QCursor(Qt.PointingHandCursor))  # Set cursor
+        self.deleteIcon.setCursor(QCursor(Qt.PointingHandCursor))
+        self.deleteIcon.setToolTip("Delete")  # Set tooltip for delete icon
 
         self.layout.addWidget(self.button, 1)
         self.layout.addWidget(self.editIcon)
