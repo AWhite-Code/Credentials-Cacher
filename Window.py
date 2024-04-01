@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QStackedWidget
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import QMainWindow, QApplication, QStackedWidget
 from Login import LoginWidget
 from Vault_Window import VaultWidget
 from Registration import RegistrationWidget

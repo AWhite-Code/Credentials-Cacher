@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QApplication, QFrame, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit
 )
 from PyQt5.QtCore import Qt
 from Password_Entry import PasswordEntryButton
@@ -313,8 +313,6 @@ class VaultWidget(QWidget):
             self.populate_vault(filtered_entries)
         else:
             self.populate_vault([])  # Clear the display if there's no encryption key
-
-
 
 
     def display_entry_details(self, entry_data, button):

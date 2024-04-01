@@ -1,8 +1,6 @@
 import sqlite3
 import os
 from Encryption import Encryption
-from Hashing import Hashing
-import logging
 
 class Database:
     def __init__(self):

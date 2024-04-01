@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox, QGridLayout
+    QWidget, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox, QGridLayout
 )
 from PyQt5.QtCore import Qt
 import pickle
