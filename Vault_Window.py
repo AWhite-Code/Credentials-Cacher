@@ -297,7 +297,7 @@ class VaultWidget(QWidget):
             button = PasswordEntryButton(entry)
             button.displayDetails.connect(lambda entry_data=entry, button=button: self.display_entry_details(entry_data, button))
             button.editClicked.connect(lambda entry_data=entry: self.enter_Edit_Mode(entry_data))
-            button.deleteClicked.connect(lambda entry_id=entry[0]: self.delete_Entry(entry_id))
+            button.deleteClicked.connect(lambda: self.delete_Entry(entry[0]))
             button.toggleFavourite.connect(lambda entry_id=entry[0], is_favourite=(entry[6] == 1): self.handleToggleFavourite(entry_id, is_favourite))
             self.scrollContentLayout.addWidget(button)
                 
@@ -373,12 +373,8 @@ class VaultWidget(QWidget):
         super().resizeEvent(event)
         
         
-    def delete_Entry(self, entry_data):
+    def delete_Entry(self, entry_id):
         print("Deleting entry with ID:", entry_id)
-        # Extract the id or unique identifier from entry_data
-        entry_id = entry_data[0]  # Assuming entry_data[0] is the unique id of the entry in the database
-
-        # Execute SQL statement to delete the entry from the database
         self.db.delete_password_entry(entry_id)
 
         # Refresh the vault view. If there's a search term, refresh the search; otherwise, refresh the entire vault.

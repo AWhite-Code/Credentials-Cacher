@@ -55,7 +55,7 @@ class Database:
         cursor = self.connection.cursor()
         cursor.execute("DELETE FROM vault WHERE id = ?", (entry_id,))
         self.connection.commit()
-
+        
     def add_password_entry(self, website_name, website_url, username, password, notes, encryption_key):
         # Encrypt each piece of data and serialize it
         encrypted_website_name = Encryption.encrypt_data(website_name, encryption_key)
