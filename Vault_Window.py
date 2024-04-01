@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame
 )
 from PyQt5.QtCore import Qt
 from Password_Entry import PasswordEntryButton
@@ -56,24 +56,39 @@ class VaultWidget(QWidget):
 
     def setupLeftColumn(self):
         self.leftColumnLayout = QVBoxLayout()
+
+        # Layout for vault ordering buttons
+        vaultOrderLayout = QVBoxLayout()
+        orderLabel = QLabel("Order vault by:")
+        vaultOrderLayout.addWidget(orderLabel)
+
         allItemsButton = QPushButton("All Items")
         allItemsButton.clicked.connect(lambda: self.changeMode('all'))
-        
+        vaultOrderLayout.addWidget(allItemsButton)
+            
         favouritesButton = QPushButton("Favourites")
         favouritesButton.clicked.connect(lambda: self.changeMode('favourites'))
-        
+        vaultOrderLayout.addWidget(favouritesButton)
+
+        # Add vault ordering layout to the main left column layout
+        self.leftColumnLayout.addLayout(vaultOrderLayout)
+
+        # Spacer after vault ordering
+        self.leftColumnLayout.addSpacerItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Fixed))
+
+        # Password Generator button
         passwordGeneratorButton = QPushButton("Password Generator")
-        self.add_password_button = QPushButton("Add New Password")  # Define the button here
-        
-        self.leftColumnLayout.addWidget(allItemsButton)
-        self.leftColumnLayout.addWidget(favouritesButton)
         self.leftColumnLayout.addWidget(passwordGeneratorButton)
+
+        # Spacer before the Add New Password button
         self.leftColumnLayout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-        self.leftColumnLayout.addWidget(self.add_password_button)
-        
-        # Connect the add_new_password button to toggle the view
+
+        # Add New Password button at the bottom
+        self.add_password_button = QPushButton("Add New Password")
         self.add_password_button.clicked.connect(lambda: self.toggle_add_password_form())
-       
+        self.leftColumnLayout.addWidget(self.add_password_button)
+
+        # Add the left column layout to the main content layout at the leftmost position
         self.mainContentLayout.addLayout(self.leftColumnLayout, 0)
             
     def setupCentralColumn(self):
