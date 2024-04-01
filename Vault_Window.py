@@ -292,14 +292,15 @@ class VaultWidget(QWidget):
             entries = []  # Clear or handle accordingly if no encryption key
 
         # Populate the vault with the provided or fetched entries
+
         for entry in entries:
             button = PasswordEntryButton(entry)
-            button.displayDetails.connect(self.display_entry_details)
-            # Connect deleteClicked signal to deleteEntry method
-            button.deleteClicked.connect(lambda entry_data=entry: self.deleteEntry(entry_data))
-            button.editClicked.connect(self.enter_Edit_Mode)
+            button.displayDetails.connect(lambda entry_data=entry, button=button: self.display_entry_details(entry_data, button))
+            button.editClicked.connect(lambda entry_data=entry: self.enter_Edit_Mode(entry_data))
+            button.deleteClicked.connect(lambda entry_id=entry[0]: self.delete_Entry(entry_id))
+            button.toggleFavourite.connect(lambda entry_id=entry[0], is_favourite=(entry[6] == 1): self.handleToggleFavourite(entry_id, is_favourite))
             self.scrollContentLayout.addWidget(button)
-            
+                
     def search_vault(self):
         """Filter and display entries based on the search query using the current encryption key."""
         if self.encryption_key:
@@ -372,7 +373,8 @@ class VaultWidget(QWidget):
         super().resizeEvent(event)
         
         
-    def deleteEntry(self, entry_data):
+    def delete_Entry(self, entry_data):
+        print("Deleting entry with ID:", entry_id)
         # Extract the id or unique identifier from entry_data
         entry_id = entry_data[0]  # Assuming entry_data[0] is the unique id of the entry in the database
 
@@ -386,6 +388,7 @@ class VaultWidget(QWidget):
             self.populate_vault()
             
     def enter_Edit_Mode(self, entry_data):
+        print("Entering edit mode for entry:", entry_data[0])
         """Prepares and shows the add/edit form with pre-filled entry data for editing."""
         self.website_name_entry.setText(entry_data[1])
         self.website_url_entry.setText(entry_data[2])
@@ -396,3 +399,9 @@ class VaultWidget(QWidget):
         self.current_edit_id = entry_data[0]
         # Switch to the add/edit form view
         self.stackedWidget.setCurrentIndex(1)
+        
+    def handleToggleFavourite(self, entry_id, is_favourite):
+        # Toggle the favourite status in the database
+        new_status = 0 if is_favourite else 1
+        self.db.toggle_favourite_status(entry_id, new_status)
+        self.populate_vault()  # Refresh the UI

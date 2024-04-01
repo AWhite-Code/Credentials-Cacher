@@ -120,13 +120,13 @@ class Database:
         self.connection.commit()
         
         
-    def toggle_favourite_status(self, entry_id):
-        """Toggles the favourite status of an entry."""
+    def toggle_favourite_status(self, entry_id, current_status):
+        new_status = 0 if current_status else 1  # Assuming current_status is True/1 for favourites
         cursor = self.connection.cursor()
-        query = "UPDATE vault SET favourite = (favourite + 1) % 2 WHERE id = ?;"
-        cursor.execute(query, (entry_id,))
+        query = "UPDATE vault SET favourite = ? WHERE id = ?;"
+        cursor.execute(query, (new_status, entry_id))
         self.connection.commit()
-        
+            
     def fetch_favourites(self, encryption_key):
         """Fetches all entries marked as favourites."""
         cursor = self.connection.cursor()

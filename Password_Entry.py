@@ -6,7 +6,7 @@ class PasswordEntryButton(QWidget):
     displayDetails = pyqtSignal(object, object)
     editClicked = pyqtSignal(object)
     deleteClicked = pyqtSignal(object)
-    toggleFavourite = pyqtSignal(object)  # Add a signal for toggling favourite status
+    toggleFavourite = pyqtSignal(int, bool)
 
     def __init__(self, entry_data, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,6 +28,7 @@ class PasswordEntryButton(QWidget):
         # Edit Icon setup
         self.editIcon = QLabel(self)
         editPixmap = QPixmap('Icons/edit.png').scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.editIcon.mousePressEvent = self.onEditClicked
         self.editIcon.setPixmap(editPixmap)
         self.editIcon.hide()
         self.editIcon.setCursor(QCursor(Qt.PointingHandCursor))
@@ -36,6 +37,7 @@ class PasswordEntryButton(QWidget):
         # Delete Icon setup
         self.deleteIcon = QLabel(self)
         deletePixmap = QPixmap('Icons/delete.png').scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.deleteIcon.mousePressEvent = self.onDeleteClicked
         self.deleteIcon.setPixmap(deletePixmap)
         self.deleteIcon.hide()
         self.deleteIcon.setCursor(QCursor(Qt.PointingHandCursor))
@@ -43,14 +45,18 @@ class PasswordEntryButton(QWidget):
 
         # Favourite Icon setup
         self.favouriteIcon = QLabel(self)  # Make sure this line is correctly included
+        self.favouriteIcon.mousePressEvent = self.onFavouriteClicked
         self.favouriteIcon.setVisible(False)
-        isFavourite = bool(entry_data[6])
+        isFavourite = entry_data[6] == 1
+        print(isFavourite)
+        self.entryID = entry_data[0]
         favIconPath = 'Icons/heart_favourited.png' if isFavourite else 'Icons/heart_empty.png'
         favIconPixmap = QPixmap(favIconPath).scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.favouriteIcon.setPixmap(favIconPixmap)
         self.favouriteIcon.setCursor(QCursor(Qt.PointingHandCursor))
         self.favouriteIcon.setToolTip("Toggle Favourite")
-        self.favouriteIcon.mousePressEvent = lambda event: self.toggleFavourite.emit(self.entry_data)
+        self.favouriteIcon.mousePressEvent = lambda event: self.toggleFavourite.emit(self.entry_data[0], self.entry_data[6] == 1)
+ 
 
         # Adding widgets to the layout
         self.layout.addWidget(self.button, 1)
@@ -59,29 +65,6 @@ class PasswordEntryButton(QWidget):
         self.layout.addWidget(self.favouriteIcon)  # Ensure this is correctly added after initialization
 
         self.applyStylesheet()
-
-    """def setupIcons(self, iconSize):
-        # Set up for edit and delete icons as you have before
-        self.editIcon = QLabel(self)
-        editPixmap = QPixmap('Icons/edit.png').scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.editIcon.setPixmap(editPixmap)
-        self.editIcon.hide()
-        self.editIcon.setCursor(QCursor(Qt.PointingHandCursor))
-        self.editIcon.setToolTip("Edit")
-        self.editIcon.mousePressEvent = self.onEditClicked
-
-        self.deleteIcon = QLabel(self)
-        deletePixmap = QPixmap('Icons/delete.png').scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.deleteIcon.setPixmap(deletePixmap)
-        self.deleteIcon.hide()
-        self.deleteIcon.setCursor(QCursor(Qt.PointingHandCursor))
-        self.deleteIcon.setToolTip("Delete")
-        self.deleteIcon.mousePressEvent = self.onDeleteClicked
-
-        self.layout.addWidget(self.button, 1)
-        self.layout.addWidget(self.editIcon)
-        self.layout.addWidget(self.deleteIcon)
-        self.layout.addWidget(self.favouriteIcon)"""
 
     def applyStylesheet(self):
         self.setStyleSheet("""
@@ -143,10 +126,17 @@ class PasswordEntryButton(QWidget):
         self.displayDetails.emit(self.entry_data, self)
 
     def onEditClicked(self, event):
+        print("Edit clicked for entry ID:", self.entry_data[0])
         self.editClicked.emit(self.entry_data)
 
     def onDeleteClicked(self, event):
+        print("Delete clicked for entry ID:", self.entry_data[0])
         self.deleteClicked.emit(self.entry_data)
+        
+    def onFavouriteClicked(self, event):
+        # Emit the toggleFavourite signal with correct parameters
+        current_status = self.entry_data[6] == 1
+        self.toggleFavourite.emit(self.entry_data[0], current_status)
         
 
     def setSelected(self, isSelected):
