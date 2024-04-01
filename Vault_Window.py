@@ -331,7 +331,7 @@ class VaultWidget(QWidget):
         self.usernameLineEdit.setText(entry_data[3] if len(entry_data) > 3 else "")
         self.passwordLineEdit.setText(entry_data[4] if len(entry_data) > 4 else "")
         self.notesTextEdit.setText(entry_data[5] if len(entry_data) > 5 else "")
-        self.lastUpdatedLabel.setText(f"Last Updated: {entry_data[7]}" if len(entry_data) > 7 else "")
+        self.lastUpdatedLabel.setText(f"Last Updated: {entry_data[8]}" if len(entry_data) > 8 else "")
 
     def applyStylesheet(self):
         """Applies the CSS stylesheet to the widget."""

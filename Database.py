@@ -43,6 +43,7 @@ class Database:
             username TEXT NOT NULL,
             password TEXT NOT NULL,
             notes TEXT,
+            favourite INTEGER DEFAULT 0, 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -117,3 +118,20 @@ class Database:
                    WHERE id = ?;"""
         cursor.execute(query, (encrypted_website_name, encrypted_website_url, encrypted_username, encrypted_password, encrypted_notes, id))
         self.connection.commit()
+        
+        
+    def toggle_favourite_status(self, entry_id):
+        """Toggles the favourite status of an entry."""
+        cursor = self.connection.cursor()
+        query = "UPDATE vault SET favourite = (favourite + 1) % 2 WHERE id = ?;"
+        cursor.execute(query, (entry_id,))
+        self.connection.commit()
+        
+    def fetch_favourites(self, encryption_key):
+        """Fetches all entries marked as favourites."""
+        cursor = self.connection.cursor()
+        query = "SELECT id, website_name, website_url, username, password, notes, created_at, updated_at FROM vault WHERE favourite = 1;"
+        cursor.execute(query)
+        encrypted_entries = cursor.fetchall()
+        decrypted_entries = [self.decrypt_entry(entry, encryption_key) for entry in encrypted_entries]  # Assuming you have a method to decrypt an entry
+        return decrypted_entries
