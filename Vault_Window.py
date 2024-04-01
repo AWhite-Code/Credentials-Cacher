@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from Password_Entry import PasswordEntryButton
-import logging
 
 class VaultWidget(QWidget):
     def __init__(self, db, parent=None):
