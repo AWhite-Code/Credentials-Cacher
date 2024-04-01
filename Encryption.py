@@ -41,6 +41,12 @@ class Encryption:
 
     @staticmethod
     def decrypt_data(encrypted: str, key: bytes) -> str:
+        if key is None:
+            logging.error("Encryption key is None. Decryption cannot proceed.")
+            return "" 
+        if encrypted is None:
+            logging.error("Encrypted data is None. Decryption cannot proceed.")
+            return "" 
         try:
             #logging.debug(f"Encrypted data received for decryption: {encrypted}")
             encrypted_dict = json.loads(encrypted)

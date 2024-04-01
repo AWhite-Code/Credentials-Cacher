@@ -10,6 +10,7 @@ class VaultWidget(QWidget):
         self.db = db
         self.selectedButton = None  # Track the selected button
         self.encryption_key = None
+        self.currentMode = 'all'  # Default mode
         self.initUI()
         self.current_edit_id = None  # None indicates "add mode"
         
@@ -56,9 +57,14 @@ class VaultWidget(QWidget):
     def setupLeftColumn(self):
         self.leftColumnLayout = QVBoxLayout()
         allItemsButton = QPushButton("All Items")
+        allItemsButton.clicked.connect(lambda: self.changeMode('all'))
+        
         favouritesButton = QPushButton("Favourites")
+        favouritesButton.clicked.connect(lambda: self.changeMode('favourites'))
+        
         passwordGeneratorButton = QPushButton("Password Generator")
         self.add_password_button = QPushButton("Add New Password")  # Define the button here
+        
         self.leftColumnLayout.addWidget(allItemsButton)
         self.leftColumnLayout.addWidget(favouritesButton)
         self.leftColumnLayout.addWidget(passwordGeneratorButton)
@@ -103,12 +109,6 @@ class VaultWidget(QWidget):
 
         # Populate the vault
         self.populate_vault()
-            
-    """def init_add_password_form(self):
-        self.addPasswordFormWidget = QWidget()
-        formLayout = QFormLayout(self.addPasswordFormWidget)
-        # Set up form fields...
-        self.stackedWidget.addWidget(self.addPasswordFormWidget)"""
 
 
     def setupRightColumn(self):
@@ -272,47 +272,63 @@ class VaultWidget(QWidget):
         self.password_entry.clear()
         self.notes_entry.clear()
     
-    def populate_vault(self, entries=None):
+    def populate_vault(self, entries=None, reselect_entry_id=None):
         """Fetch and display entries using the current encryption key."""
-        # Deselect and reset the currently selected button, if any
         if self.selectedButton:
             self.selectedButton.setSelected(False)
             self.selectedButton = None
 
-        # Clear existing content in the vault display area
         while self.scrollContentLayout.count():
             child = self.scrollContentLayout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
-        # If no specific entries are provided, fetch all
-        if entries is None and self.encryption_key:
-            entries = self.db.fetch_all_entries(self.encryption_key)
-        elif not self.encryption_key:
-            entries = []  # Clear or handle accordingly if no encryption key
-
-        # Populate the vault with the provided or fetched entries
+        if entries is None:
+            if not self.encryption_key:
+                entries = []  
+            elif self.currentMode == 'all':
+                entries = self.db.fetch_all_entries(self.encryption_key)
+            elif self.currentMode == 'favourites':
+                entries = self.db.fetch_favourites(self.encryption_key)
 
         for entry in entries:
             button = PasswordEntryButton(entry)
             button.displayDetails.connect(lambda entry_data=entry, button=button: self.display_entry_details(entry_data, button))
             button.editClicked.connect(lambda entry_data=entry: self.enter_Edit_Mode(entry_data))
             button.deleteClicked.connect(lambda: self.delete_Entry(entry[0]))
-            button.toggleFavourite.connect(lambda entry_id=entry[0], is_favourite=(entry[6] == 1): self.handleToggleFavourite(entry_id, is_favourite))
+            button.toggleFavourite.connect(self.handleToggleFavourite)
             self.scrollContentLayout.addWidget(button)
+            
+            # Reselect the entry if it matches the reselect_entry_id
+            if reselect_entry_id is not None and entry[0] == reselect_entry_id:
+                self.display_entry_details(entry, button)
+                button.setSelected(True)
+                self.selectedButton = button
                 
     def search_vault(self):
         """Filter and display entries based on the search query using the current encryption key."""
-        if self.encryption_key:
-            search_query = self.searchLineEdit.text().lower()
-
-            all_entries = self.db.fetch_all_entries(self.encryption_key)
-
-            filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
-
-            self.populate_vault(filtered_entries)
-        else:
+        if not self.encryption_key:
             self.populate_vault([])  # Clear the display if there's no encryption key
+            return  # Guard clause to exit early if there's no encryption key
+
+        search_query = self.searchLineEdit.text().lower()
+        print(f"Search query: {search_query}")
+        # Decide which set of entries to fetch based on the current mode
+        if self.currentMode == 'all':
+            all_entries = self.db.fetch_all_entries(self.encryption_key)
+        else:  # 'favourites' mode
+            all_entries = self.db.fetch_favourites(self.encryption_key)
+
+        # Debug: Print all entries fetched before filtering
+        print(f"All entries before filtering: {[entry[1] for entry in all_entries]}")
+
+        # Filter the entries based on the search query
+        filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
+
+        # Debug: Print entries after filtering
+        print(f"Filtered entries: {[entry[1] for entry in filtered_entries]}")
+
+        self.populate_vault(filtered_entries)
 
 
     def display_entry_details(self, entry_data, button):
@@ -396,8 +412,12 @@ class VaultWidget(QWidget):
         # Switch to the add/edit form view
         self.stackedWidget.setCurrentIndex(1)
         
-    def handleToggleFavourite(self, entry_id, is_favourite):
-        # Toggle the favourite status in the database
-        new_status = 0 if is_favourite else 1
+    def handleToggleFavourite(self, entry_id, current_status):
+        new_status = not current_status
         self.db.toggle_favourite_status(entry_id, new_status)
-        self.populate_vault()  # Refresh the UI
+        # Use the currently selected entry's ID to refresh and reselect the entry
+        self.populate_vault(reselect_entry_id=entry_id)
+
+    def changeMode(self, mode):
+        self.currentMode = mode
+        self.populate_vault()

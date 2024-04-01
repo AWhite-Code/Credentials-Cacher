@@ -36,18 +36,17 @@ class Database:
     def create_table(self):
         cursor = self.connection.cursor()
         table_creation_query = """
-        CREATE TABLE IF NOT EXISTS vault (
-            id INTEGER PRIMARY KEY,
-            website_name TEXT NOT NULL,
-            website_url TEXT,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL,
-            notes TEXT,
-            favourite INTEGER DEFAULT 0, 
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
+            CREATE TABLE IF NOT EXISTS vault (
+                id INTEGER PRIMARY KEY,
+                website_name TEXT NOT NULL,
+                website_url TEXT,
+                username TEXT NOT NULL,
+                password TEXT NOT NULL,
+                notes TEXT,
+                favourite INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );"""
         cursor.execute(table_creation_query)
         self.connection.commit()
         
@@ -75,28 +74,29 @@ class Database:
             encrypted_password or '',
             encrypted_notes or ''))
         self.connection.commit()
-        
+            
     def fetch_all_entries(self, encryption_key):
         cursor = self.connection.cursor()
-        query = "SELECT id, website_name, website_url, username, password, notes, created_at, updated_at FROM vault;"
-        cursor.execute(query)
+        cursor.execute("SELECT id, website_name, website_url, username, password, notes, favourite, created_at, updated_at FROM vault;")
         encrypted_entries = cursor.fetchall()
         decrypted_entries = []
 
         for entry in encrypted_entries:
-            id, encrypted_website_name, encrypted_website_url, encrypted_username, encrypted_password, encrypted_notes, created_at, updated_at = entry
-
-            #logging.debug(f"Attempting to decrypt website name: {encrypted_website_name}")
-            website_name = Encryption.decrypt_data(encrypted_website_name, encryption_key) if encrypted_website_name else None
-
-            #logging.debug(f"Attempting to decrypt website URL: {encrypted_website_url}")
-            website_url = Encryption.decrypt_data(encrypted_website_url, encryption_key) if encrypted_website_url else None
+            # Unpacking all fields including the 'favourite' field
+            id, encrypted_website_name, encrypted_website_url, encrypted_username, encrypted_password, encrypted_notes, favourite, created_at, updated_at = entry
             
+            # Decrypting the encrypted data
+            website_name = Encryption.decrypt_data(encrypted_website_name, encryption_key) if encrypted_website_name else None
+            website_url = Encryption.decrypt_data(encrypted_website_url, encryption_key) if encrypted_website_url else None
             username = Encryption.decrypt_data(encrypted_username, encryption_key)
             password = Encryption.decrypt_data(encrypted_password, encryption_key)
             notes = Encryption.decrypt_data(encrypted_notes, encryption_key) if encrypted_notes else None
 
-            decrypted_entries.append((id, website_name, website_url, username, password, notes, created_at, updated_at))
+            # Adding a debug statement to check the fetched 'favourite' status
+            print(f"Fetched entry ID: {id}, Favourite status: {favourite}")
+
+            # Append decrypted entry to the list, converting 'favourite' to a boolean
+            decrypted_entries.append((id, website_name, website_url, username, password, notes, bool(favourite), created_at, updated_at))
 
         return decrypted_entries
 
@@ -120,18 +120,31 @@ class Database:
         self.connection.commit()
         
         
-    def toggle_favourite_status(self, entry_id, current_status):
-        new_status = 0 if current_status else 1  # Assuming current_status is True/1 for favourites
+    def toggle_favourite_status(self, entry_id, new_status):
+        print(f"Toggling favorite status in database for entry ID: {entry_id} to {new_status}")
         cursor = self.connection.cursor()
-        query = "UPDATE vault SET favourite = ? WHERE id = ?;"
-        cursor.execute(query, (new_status, entry_id))
+        cursor.execute("UPDATE vault SET favourite = ? WHERE id = ?", (new_status, entry_id))
         self.connection.commit()
-            
+                    
     def fetch_favourites(self, encryption_key):
-        """Fetches all entries marked as favourites."""
         cursor = self.connection.cursor()
-        query = "SELECT id, website_name, website_url, username, password, notes, created_at, updated_at FROM vault WHERE favourite = 1;"
+        query = "SELECT id, website_name, website_url, username, password, notes, favourite, created_at, updated_at FROM vault WHERE favourite = 1;"
         cursor.execute(query)
         encrypted_entries = cursor.fetchall()
-        decrypted_entries = [self.decrypt_entry(entry, encryption_key) for entry in encrypted_entries]  # Assuming you have a method to decrypt an entry
+        decrypted_entries = []
+
+        for entry in encrypted_entries:
+            # Unpack all fields including the 'favourite' field
+            id, encrypted_website_name, encrypted_website_url, encrypted_username, encrypted_password, encrypted_notes, favourite, created_at, updated_at = entry
+            
+            # Decrypting the encrypted data
+            website_name = Encryption.decrypt_data(encrypted_website_name, encryption_key) if encrypted_website_name else None
+            website_url = Encryption.decrypt_data(encrypted_website_url, encryption_key) if encrypted_website_url else None
+            username = Encryption.decrypt_data(encrypted_username, encryption_key)
+            password = Encryption.decrypt_data(encrypted_password, encryption_key)
+            notes = Encryption.decrypt_data(encrypted_notes, encryption_key) if encrypted_notes else None
+
+            # Append decrypted entry to the list
+            decrypted_entries.append((id, website_name, website_url, username, password, notes, bool(favourite), created_at, updated_at))
+
         return decrypted_entries
