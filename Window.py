@@ -56,13 +56,18 @@ class MainWindow(QMainWindow):
     
     def set_encryption_key(self, key):
         self.encryption_key = key
-        self.vault_widget.set_encryption_key(key)  # Pass the key to VaultWidget
+        if key is not None:
+            self.populate_vault() 
 
     def clear_encryption_key(self):
         self.encryption_key = None
         self.vault_widget.set_encryption_key(None)  # Inform VaultWidget to clear the key
 
     def closeEvent(self, event):
+        # First clear the encryption key without trying to repopulate the vault
+        self.clear_encryption_key()  # This will now only clear the key and not try to repopulate the vault
+        
+        # Now it's safe to close the database connection
         self.db.close_connection()
-        self.clear_encryption_key()  # Ensure the encryption key is cleared when the application closes
+        
         event.accept()  # Close the PYQT window normally

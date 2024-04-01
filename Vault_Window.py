@@ -69,6 +69,14 @@ class VaultWidget(QWidget):
         favouritesButton = QPushButton("Favourites")
         favouritesButton.clicked.connect(lambda: self.changeMode('favourites'))
         vaultOrderLayout.addWidget(favouritesButton)
+        
+        alphabeticalOrderButton = QPushButton("Alphabetical Order")
+        alphabeticalOrderButton.clicked.connect(lambda: self.changeMode('alphabetical'))
+        vaultOrderLayout.addWidget(alphabeticalOrderButton)
+
+        lastUpdatedButton = QPushButton("Last Updated")
+        lastUpdatedButton.clicked.connect(lambda: self.changeMode('lastUpdated'))
+        vaultOrderLayout.addWidget(lastUpdatedButton)
 
         # Add vault ordering layout to the main left column layout
         self.leftColumnLayout.addLayout(vaultOrderLayout)
@@ -299,12 +307,14 @@ class VaultWidget(QWidget):
                 child.widget().deleteLater()
 
         if entries is None:
-            if not self.encryption_key:
-                entries = []  
-            elif self.currentMode == 'all':
+            if self.currentMode == 'all':
                 entries = self.db.fetch_all_entries(self.encryption_key)
             elif self.currentMode == 'favourites':
                 entries = self.db.fetch_favourites(self.encryption_key)
+            elif self.currentMode == 'alphabetical':
+                entries = sorted(self.db.fetch_all_entries(self.encryption_key), key=lambda x: x[1].lower())
+            elif self.currentMode == 'lastUpdated':
+                entries = sorted(self.db.fetch_all_entries(self.encryption_key), key=lambda x: x[7], reverse=True)
 
         for entry in entries:
             button = PasswordEntryButton(entry)
