@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox
 )
 from PyQt5.QtCore import Qt
 from Password_Entry import PasswordEntryButton
+from Password_Generator import PasswordGenerator
 
 class VaultWidget(QWidget):
     def __init__(self, db, parent=None):
@@ -16,7 +17,8 @@ class VaultWidget(QWidget):
         
     def set_encryption_key(self, key):
         self.encryption_key = key
-        self.populate_vault()  # Repopulate the vault with the encryption key    
+        if key is not None:
+            self.populate_vault()  
 
     def initUI(self):
         # Main layout
@@ -87,6 +89,7 @@ class VaultWidget(QWidget):
         # Password Generator button
         passwordGeneratorButton = QPushButton("Password Generator")
         self.leftColumnLayout.addWidget(passwordGeneratorButton)
+        passwordGeneratorButton.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(self.passwordGeneratorFormWidget)))
 
         # Spacer before the Add New Password button
         self.leftColumnLayout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -120,6 +123,8 @@ class VaultWidget(QWidget):
 
         # Call init_add_password_form to setup and add the Add Password Form as the second view
         self.init_add_password_form()
+        
+        self.init_password_generator_form()
 
         # Ensure the vault view is the initial view
         self.stackedWidget.setCurrentIndex(0)
@@ -243,6 +248,7 @@ class VaultWidget(QWidget):
 
         # Add the form widget to the stackedWidget
         self.stackedWidget.addWidget(self.addPasswordFormWidget)
+        
 
     def toggle_add_password_form(self):
         # Toggle between the vault view and the Add Password form
@@ -252,6 +258,37 @@ class VaultWidget(QWidget):
         else:
             self.stackedWidget.setCurrentIndex(0)  # Show vault view
             
+    def init_password_generator_form(self):
+        self.passwordGeneratorFormWidget = QWidget()
+        formLayout = QVBoxLayout(self.passwordGeneratorFormWidget)
+        
+        # Length Slider
+        self.lengthSlider = QSlider(Qt.Horizontal)
+        self.lengthSlider.setMinimum(12)
+        self.lengthSlider.setMaximum(50)
+        self.lengthSlider.setValue(12)
+        
+        # Length Label
+        lengthLabel = QLabel("Password Length: 12")
+        self.lengthSlider.valueChanged.connect(lambda: lengthLabel.setText(f"Password Length: {self.lengthSlider.value()}"))
+        
+        # Generate Button
+        generateButton = QPushButton("Generate Password")
+        generateButton.clicked.connect(self.generate_password)
+        
+        # Password Display
+        self.generatedPasswordDisplay = QLineEdit()
+        self.generatedPasswordDisplay.setReadOnly(True)
+
+        # Add widgets to the form layout
+        formLayout.addWidget(lengthLabel)
+        formLayout.addWidget(self.lengthSlider)
+        formLayout.addWidget(generateButton)
+        formLayout.addWidget(self.generatedPasswordDisplay)
+        
+        # Add the form widget to the stackedWidget
+        self.stackedWidget.addWidget(self.passwordGeneratorFormWidget)      
+                
     def submit_password_details(self):
         """Handles the submission of password details for both adding new and updating existing entries."""
         website_name = self.website_name_entry.text()
@@ -446,3 +483,8 @@ class VaultWidget(QWidget):
     def changeMode(self, mode):
         self.currentMode = mode
         self.populate_vault()
+        
+    def generate_password(self):
+        length = self.lengthSlider.value()
+        generated_password = PasswordGenerator.generate_password(length)
+        self.generatedPasswordDisplay.setText(generated_password)

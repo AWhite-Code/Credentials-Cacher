@@ -56,8 +56,7 @@ class MainWindow(QMainWindow):
     
     def set_encryption_key(self, key):
         self.encryption_key = key
-        if key is not None:
-            self.populate_vault() 
+        self.vault_widget.set_encryption_key(key)  # Pass the key to VaultWidget
 
     def clear_encryption_key(self):
         self.encryption_key = None
