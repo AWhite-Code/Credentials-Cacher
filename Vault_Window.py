@@ -521,13 +521,23 @@ class VaultWidget(QWidget):
 
         # Validation: Ensure total specified characters do not exceed password length
         if num_digits + num_special > length:
-            self.displayErrorMessage("Error: Specified digits and special characters exceed total length.")
-            return
+            self.displayPasswordOutput("Error: Specified digits and special characters exceed total length.", isError=True)
+            return  # Stop the function if there's an error
 
+        # Proceed with generating the password if validation passes
         generated_password = PasswordGenerator.generate_password(length, include_uppercase, num_digits, num_special)
-        self.generatedPasswordDisplay.setStyleSheet("color: black; font-weight: normal;")  # Reset style in case it was set by an error
-        self.generatedPasswordDisplay.setText(generated_password)
+        self.displayPasswordOutput(generated_password, isError=False)
 
-    def displayErrorMessage(self, message):
-        self.generatedPasswordDisplay.setStyleSheet("color: red; font-weight: bold;")
+    def displayPasswordOutput(self, message, isError=False):
+        """
+        Displays a message in the generatedPasswordDisplay QLineEdit.
+        Adjusts the styling based on whether it's an error message or not.
+        """
+        if isError:
+            # Style for error messages
+            self.generatedPasswordDisplay.setStyleSheet("color: red; font-weight: bold;")
+        else:
+            # Reset to default style for normal password output
+            self.generatedPasswordDisplay.setStyleSheet("color: black; font-weight: normal;")
+
         self.generatedPasswordDisplay.setText(message)
