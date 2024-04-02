@@ -266,64 +266,56 @@ class VaultWidget(QWidget):
         self.passwordGeneratorFormWidget = QWidget()
         generatorLayout = QVBoxLayout(self.passwordGeneratorFormWidget)
 
-        # Generate Password UI Elements
+        # Initialize UI components as before
         self.generatedPasswordDisplay = QLineEdit()
         self.generatedPasswordDisplay.setReadOnly(True)
         self.generateButton = QPushButton("Generate Password")
         self.lengthSlider = QSlider(Qt.Horizontal)
         self.lengthSlider.setMinimum(12)
         self.lengthSlider.setMaximum(50)
-        self.lengthSlider.setValue(12)  # Default value
-        self.lengthSliderLabel = QLabel("12")  # Display initial slider value
+        self.lengthSliderLabel = QLabel("12")
         self.includeUppercaseCheckbox = QCheckBox("Include uppercase letters")
-        self.includeUppercaseCheckbox.setChecked(True)
         self.includeNumbersCheckbox = QCheckBox("Include numbers")
-        self.includeNumbersCheckbox.setChecked(True)
         self.includeSpecialCharsCheckbox = QCheckBox("Include special characters")
-        self.includeSpecialCharsCheckbox.setChecked(True)
-        
-        # Number of Numbers and Special Characters Inputs
-        self.numbersCountEdit = QLineEdit("2")
-        self.specialCharsCountEdit = QLineEdit("2")
+        self.numbersCountEdit = QLineEdit()
+        self.specialCharsCountEdit = QLineEdit()
         self.numbersCountEdit.setValidator(QIntValidator(0, 100))
         self.specialCharsCountEdit.setValidator(QIntValidator(0, 100))
 
-        # Adding new UI elements to the layout
-        countsLayout = QHBoxLayout()
-        countsLayout.addWidget(QLabel("Number of Digits:"))
-        countsLayout.addWidget(self.numbersCountEdit)
-        countsLayout.addWidget(QLabel("Number of Special Characters:"))
-        countsLayout.addWidget(self.specialCharsCountEdit)
-        generatorLayout.addLayout(countsLayout)
-
-        # Setup UI elements in the layout
-        generatorLayout.addWidget(QLabel("Generated Password:"))
-        generatorLayout.addWidget(self.generatedPasswordDisplay)
-        
-        lengthLayout = QHBoxLayout()
-        lengthLayout.addWidget(QLabel("Password Length:"))
-        lengthLayout.addWidget(self.lengthSlider)
-        lengthLayout.addWidget(self.lengthSliderLabel)
-        generatorLayout.addLayout(lengthLayout)
-        
-        generatorLayout.addWidget(self.includeUppercaseCheckbox)
-        generatorLayout.addWidget(self.includeNumbersCheckbox)
-        generatorLayout.addWidget(self.includeSpecialCharsCheckbox)
-        generatorLayout.addWidget(self.generateButton)
-        
+        # Load settings and apply them to the UI components
         pg_settings = self.settings.get("passwordGenerator", {})
         self.lengthSlider.setValue(pg_settings.get("length", 12))
+        self.lengthSliderLabel.setText(str(pg_settings.get("length", 12)))  # Update label as well
         self.includeUppercaseCheckbox.setChecked(pg_settings.get("includeUppercase", True))
         self.includeNumbersCheckbox.setChecked(pg_settings.get("includeNumbers", True))
         self.includeSpecialCharsCheckbox.setChecked(pg_settings.get("includeSpecial", True))
         self.numbersCountEdit.setText(str(pg_settings.get("numDigits", 2)))
         self.specialCharsCountEdit.setText(str(pg_settings.get("numSpecial", 2)))
 
-        # Signals
-        self.generateButton.clicked.connect(self.generate_password)
-        self.lengthSlider.valueChanged.connect(self.update_slider_value_label)
+        # Set up the rest of the UI as before
+        countsLayout = QHBoxLayout()
+        countsLayout.addWidget(QLabel("Number of Digits:"))
+        countsLayout.addWidget(self.numbersCountEdit)
+        countsLayout.addWidget(QLabel("Number of Special Characters:"))
+        countsLayout.addWidget(self.specialCharsCountEdit)
+        generatorLayout.addLayout(countsLayout)
+        generatorLayout.addWidget(QLabel("Generated Password:"))
+        generatorLayout.addWidget(self.generatedPasswordDisplay)
+        lengthLayout = QHBoxLayout()
+        lengthLayout.addWidget(QLabel("Password Length:"))
+        lengthLayout.addWidget(self.lengthSlider)
+        lengthLayout.addWidget(self.lengthSliderLabel)
+        generatorLayout.addLayout(lengthLayout)
+        generatorLayout.addWidget(self.includeUppercaseCheckbox)
+        generatorLayout.addWidget(self.includeNumbersCheckbox)
+        generatorLayout.addWidget(self.includeSpecialCharsCheckbox)
+        generatorLayout.addWidget(self.generateButton)
 
-        # Add this form widget to the stacked widget
+        # Connect signals
+        self.generateButton.clicked.connect(self.generate_password)
+        self.lengthSlider.valueChanged.connect(lambda: self.lengthSliderLabel.setText(str(self.lengthSlider.value())))
+
+        # Finally, add the form widget to the stacked widget
         self.stackedWidget.addWidget(self.passwordGeneratorFormWidget)
 
     def update_slider_value_label(self):
@@ -564,11 +556,10 @@ class VaultWidget(QWidget):
 
 
     def savePasswordGeneratorSettings(self, settings):
-        settings_file_path = get_settings_path()  # Use the function to get the path to settings.json in AppData
-        
+        settings_path = get_settings_path()
         try:
             # Read the existing settings file
-            with open(settings_file_path, 'r') as file:
+            with open(settings_path, 'r') as file:
                 existing_settings = json.load(file)
         except FileNotFoundError:
             # If the file doesn't exist, start with empty settings
@@ -578,7 +569,7 @@ class VaultWidget(QWidget):
         existing_settings["passwordGenerator"] = settings
 
         # Write the updated settings back to the file
-        with open(settings_file_path, 'w') as file:
+        with open(settings_path, 'w') as file:
             json.dump(existing_settings, file, indent=4)
 
     def displayPasswordOutput(self, message, isError=False):

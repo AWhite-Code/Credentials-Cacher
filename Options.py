@@ -2,6 +2,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QCheckBox, QSlider, QLabel, QPushButton
 import json
 from PyQt5.QtCore import QSettings
+from utils import get_settings_path
+
 
 class OptionsDialog(QDialog):
     def __init__(self, parent=None):
@@ -49,8 +51,9 @@ class OptionsDialog(QDialog):
         self.autoLockValueLabel.setText(str(value))
         
     def loadSettings(self):
+        settings_path = get_settings_path()
         try:
-            with open('settings.json', 'r') as file:
+            with open(settings_path, 'r') as file:
                 settings = json.load(file)
                 self.darkModeToggle.setChecked(settings.get('dark_mode', False))
                 self.passwordVisibilityToggle.setChecked(settings.get('show_passwords', False))
@@ -59,13 +62,15 @@ class OptionsDialog(QDialog):
         except FileNotFoundError:
             pass  # File doesn't exist, proceed with default values
 
+
     def accept(self):
+        settings_path = get_settings_path()
         settings = {
             'dark_mode': self.darkModeToggle.isChecked(),
             'show_passwords': self.passwordVisibilityToggle.isChecked(),
             'auto_lock': self.autoLockSlider.value(),
             'clear_clipboard': self.clipboardClearingToggle.isChecked()
         }
-        with open('settings.json', 'w') as file:
-            json.dump(settings, file)
+        with open(settings_path, 'w') as file:
+            json.dump(settings, file, indent=4)
         super().accept()
