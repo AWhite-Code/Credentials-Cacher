@@ -398,7 +398,7 @@ class VaultWidget(QWidget):
                 entries = sorted(self.db.fetch_all_entries(self.encryption_key), key=lambda x: x[7], reverse=True)
 
         for entry in entries:
-            button = PasswordEntryButton(entry)
+            button = PasswordEntryButton(entry, self.themeManager)
             button.displayDetails.connect(lambda entry_data=entry, button=button: self.display_entry_details(entry_data, button))
             button.editClicked.connect(lambda entry_data=entry: self.enter_Edit_Mode(entry_data))
             button.deleteClicked.connect(lambda: self.delete_Entry(entry[0]))

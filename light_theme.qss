@@ -35,6 +35,11 @@ QPushButton:pressed {
     color: #333333;
 }
 
+QPushButton[isSelected="true"] {
+    background-color: #F5C754; /* Yellow color for the selected button */
+    color: #333333;
+}
+
 QLabel, QCheckBox {
     color: #000000; /* Black text for readability */
 }

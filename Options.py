@@ -18,7 +18,7 @@ class OptionsDialog(QDialog):
         self.layout.addWidget(self.darkModeToggle)
 
         # Password Visibility
-        self.passwordVisibilityToggle = QCheckBox("Show Passwords")
+        self.passwordVisibilityToggle = QCheckBox("Always Show Passwords")
         self.layout.addWidget(self.passwordVisibilityToggle)
 
         # Auto-Lock Timer
