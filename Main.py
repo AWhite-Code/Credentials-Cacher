@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 from Window import MainWindow
 from Database import Database
+from Thememanager import ThemeManager  # Assuming you have a ThemeManager class defined
 import logging
 import sys
 import os
@@ -39,17 +40,22 @@ def load_or_create_settings():
     with open(settings_path, 'r') as file:
         return json.load(file)
 
+
 def main():
     db = Database()
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
 
-    # Load or create settings at the start
     settings = load_or_create_settings()
 
-# Pass settings to MainWindow
-    main_window = MainWindow(db, settings)
+    themeManager = ThemeManager(app)  # Pass the QApplication instance to the ThemeManager
+    if settings.get("darkMode"):
+        themeManager.setTheme("dark")
+    else:
+        themeManager.setTheme("light")
+
+    main_window = MainWindow(db, settings, themeManager)
     main_window.show()
     app.exec_()
 

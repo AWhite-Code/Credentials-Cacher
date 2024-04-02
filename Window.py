@@ -7,15 +7,16 @@ import os
 import pickle
 
 class MainWindow(QMainWindow):
-    def __init__(self, db, settings):
+    def __init__(self, db, settings, themeManager):
         super().__init__()
         self.db = db  # Save the db instance for later use
-        self.encryption_key = None  # New attribute for storing the encryption key
         
         self.settings = settings  # Store settings
+        self.themeManager = themeManager
+        self.encryption_key = None  # New attribute for storing the encryption key
 
         # Pass settings to VaultWidget
-        self.vault_widget = VaultWidget(self.db, self.settings, parent=self)
+        self.vault_widget = VaultWidget(self.db, self.settings, self.themeManager, parent=self)
         
         self.setWindowTitle("Credentials Cacher")
         
@@ -32,7 +33,6 @@ class MainWindow(QMainWindow):
         # Initialize widgets
         self.login_widget = LoginWidget(self.toggle_widgets, self)
         self.registration_widget = RegistrationWidget(self.toggle_widgets)
-        self.vault_widget = VaultWidget(self.db, self.settings, parent=self)
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)
@@ -43,10 +43,11 @@ class MainWindow(QMainWindow):
         self.current_widget = self.login_widget if self.check_credentials_exist() else self.registration_widget
         self.stacked_widgets.setCurrentWidget(self.current_widget)
         
-        self.autoLockTimer = QTimer(self)
-        self.autoLockTimer.timeout.connect(self.lockApplication)
+        
+        #self.autoLockTimer = QTimer(self)
+        #self.autoLockTimer.timeout.connect(self.lockApplication)
         # Set the interval based on settings
-        self.autoLockTimer.start(settings["autoLockTimer"] * 1000)
+        #self.autoLockTimer.start(settings["autoLockTimer"] * 1000)
 
     def toggle_widgets(self):
         if self.stacked_widgets.currentWidget() == self.login_widget:

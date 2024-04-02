@@ -11,10 +11,11 @@ from Options import OptionsDialog
 
 
 class VaultWidget(QWidget):
-    def __init__(self, db, settings, parent=None):
+    def __init__(self, db, settings, themeManager, parent=None):
         super().__init__(parent)
         self.db = db
-        self.settings = settings 
+        self.settings = settings
+        self.themeManager = themeManager
         self.selectedButton = None  # Track the selected button
         self.encryption_key = None
         self.currentMode = 'all'  # Default mode
@@ -32,7 +33,6 @@ class VaultWidget(QWidget):
         # Setup sublayouts
         self.setupTopBar()
         self.setupMainContent()
-        self.applyStylesheet()
         self.stackedWidget.setCurrentIndex(0)
 
     def setupTopBar(self):
@@ -452,30 +452,6 @@ class VaultWidget(QWidget):
         self.passwordLineEdit.setText(entry_data[4] if len(entry_data) > 4 else "")
         self.notesTextEdit.setText(entry_data[5] if len(entry_data) > 5 else "")
         self.lastUpdatedLabel.setText(f"Last Updated: {entry_data[8]}" if len(entry_data) > 8 else "")
-
-    def applyStylesheet(self):
-        """Applies the CSS stylesheet to the widget."""
-        self.setStyleSheet("""
-            QWidget {font: 15px;}
-            QLineEdit {
-                border: 2px solid #a9a9a9;
-                border-radius: 15px;
-                padding: 5px;
-                background-color: white;
-                color: black;
-            }
-            QLineEdit:hover {border: 2px solid #f0f0f0;}
-            QPushButton {
-                border: 2px solid #a9a9a9;
-                border-radius: 15px;
-                padding: 5px;
-                background-color: #F5C754;
-                color: black;
-                outline: none;
-            }
-            QPushButton:hover {background-color: #0053a6;}
-            QPushButton:pressed {background-color: #00397a;}
-        """)
         
     def adjustButtonWidth(self):
         """Dynamically adjusts the width of buttons."""
@@ -604,5 +580,5 @@ class VaultWidget(QWidget):
         self.generatedPasswordDisplay.setText(message)
         
     def showOptionsDialog(self):
-        dialog = OptionsDialog(self)
-        dialog.exec_()
+        optionsDialog = OptionsDialog(self.themeManager, self)
+        optionsDialog.exec_()

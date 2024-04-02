@@ -6,8 +6,9 @@ from utils import get_settings_path
 
 
 class OptionsDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, themeManager, parent=None):
         super().__init__(parent)
+        self.themeManager = themeManager
         self.setWindowTitle("Options")
         self.layout = QVBoxLayout(self)
 
@@ -62,15 +63,22 @@ class OptionsDialog(QDialog):
         except FileNotFoundError:
             pass  # File doesn't exist, proceed with default values
 
-
     def accept(self):
         settings_path = get_settings_path()
+        dark_mode_enabled = self.darkModeToggle.isChecked()
+
+        # Save settings
         settings = {
-            'dark_mode': self.darkModeToggle.isChecked(),
+            'dark_mode': dark_mode_enabled,
             'show_passwords': self.passwordVisibilityToggle.isChecked(),
             'auto_lock': self.autoLockSlider.value(),
             'clear_clipboard': self.clipboardClearingToggle.isChecked()
         }
         with open(settings_path, 'w') as file:
             json.dump(settings, file, indent=4)
+
+        # Update the theme based on the dark mode setting
+        newTheme = "dark" if dark_mode_enabled else "light"
+        self.themeManager.setTheme(newTheme)
+
         super().accept()
