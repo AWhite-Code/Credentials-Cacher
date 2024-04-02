@@ -3,31 +3,34 @@ import string
 
 class PasswordGenerator:
     @staticmethod
-    def generate_password(length=12):
-        if length < 12:
-            length = 12  # Ensuring the minimum length is 12
-
-        # Define the characters to be used in the password
-        characters = string.ascii_letters + string.digits + "!@#$%^&*(),.?\":{}|<>"
+    def generate_password(length=12, include_uppercase=True, num_digits=2, num_specials=2):
+        # Initialize character pools
+        characters = string.ascii_lowercase
+        if include_uppercase:
+            characters += string.ascii_uppercase
         
-        # Ensure the password meets all criteria by including at least one of each required character type
-        password = [
-            random.choice(string.ascii_lowercase),
-            random.choice(string.ascii_uppercase),
-            random.choice(string.digits),
-            random.choice("!@#$%^&*(),.?\":{}|<>")
-        ]
+        # Initialize parts of the password
+        password_parts = []
         
-        # Fill the rest of the password length with random choices from the characters pool
-        password += random.choices(characters, k=length - 4)
+        # Add the required number of digits
+        if num_digits > 0:
+            password_parts += random.choices(string.digits, k=num_digits)
+            characters += string.digits
         
-        # Shuffle the generated password list to avoid any predictable patterns
-        random.shuffle(password)
+        # Add the required number of special characters
+        if num_specials > 0:
+            specials = "!@#$%^&*(),.?\":{}|<>"
+            password_parts += random.choices(specials, k=num_specials)
+            characters += specials
         
-        # Join the list into a string to form the final password
-        return ''.join(password)
-
-# Example usage
-password_generator = PasswordGenerator()
-generated_password = password_generator.generate_password(12)
-print("Generated Password:", generated_password)
+        # Calculate the remaining length to be filled with characters from the pool
+        remaining_length = length - len(password_parts)
+        
+        # Generate the rest of the password
+        password_parts += random.choices(characters, k=remaining_length)
+        
+        # Shuffle to avoid predictable patterns
+        random.shuffle(password_parts)
+        
+        # Return the final password
+        return ''.join(password_parts)

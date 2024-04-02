@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (
     QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
 from Password_Entry import PasswordEntryButton
 from Password_Generator import PasswordGenerator
 
@@ -260,34 +261,62 @@ class VaultWidget(QWidget):
             
     def init_password_generator_form(self):
         self.passwordGeneratorFormWidget = QWidget()
-        formLayout = QVBoxLayout(self.passwordGeneratorFormWidget)
-        
-        # Length Slider
+        generatorLayout = QVBoxLayout(self.passwordGeneratorFormWidget)
+
+        # Generate Password UI Elements
+        self.generatedPasswordDisplay = QLineEdit()
+        self.generatedPasswordDisplay.setReadOnly(True)
+        self.generateButton = QPushButton("Generate Password")
         self.lengthSlider = QSlider(Qt.Horizontal)
         self.lengthSlider.setMinimum(12)
         self.lengthSlider.setMaximum(50)
-        self.lengthSlider.setValue(12)
+        self.lengthSlider.setValue(12)  # Default value
+        self.lengthSliderLabel = QLabel("12")  # Display initial slider value
+        self.includeUppercaseCheckbox = QCheckBox("Include uppercase letters")
+        self.includeUppercaseCheckbox.setChecked(True)
+        self.includeNumbersCheckbox = QCheckBox("Include numbers")
+        self.includeNumbersCheckbox.setChecked(True)
+        self.includeSpecialCharsCheckbox = QCheckBox("Include special characters")
+        self.includeSpecialCharsCheckbox.setChecked(True)
         
-        # Length Label
-        lengthLabel = QLabel("Password Length: 12")
-        self.lengthSlider.valueChanged.connect(lambda: lengthLabel.setText(f"Password Length: {self.lengthSlider.value()}"))
-        
-        # Generate Button
-        generateButton = QPushButton("Generate Password")
-        generateButton.clicked.connect(self.generate_password)
-        
-        # Password Display
-        self.generatedPasswordDisplay = QLineEdit()
-        self.generatedPasswordDisplay.setReadOnly(True)
+        # Number of Numbers and Special Characters Inputs
+        self.numbersCountEdit = QLineEdit("2")
+        self.specialCharsCountEdit = QLineEdit("2")
+        self.numbersCountEdit.setValidator(QIntValidator(0, 100))
+        self.specialCharsCountEdit.setValidator(QIntValidator(0, 100))
 
-        # Add widgets to the form layout
-        formLayout.addWidget(lengthLabel)
-        formLayout.addWidget(self.lengthSlider)
-        formLayout.addWidget(generateButton)
-        formLayout.addWidget(self.generatedPasswordDisplay)
+        # Adding new UI elements to the layout
+        countsLayout = QHBoxLayout()
+        countsLayout.addWidget(QLabel("Number of Digits:"))
+        countsLayout.addWidget(self.numbersCountEdit)
+        countsLayout.addWidget(QLabel("Number of Special Characters:"))
+        countsLayout.addWidget(self.specialCharsCountEdit)
+        generatorLayout.addLayout(countsLayout)
+
+        # Setup UI elements in the layout
+        generatorLayout.addWidget(QLabel("Generated Password:"))
+        generatorLayout.addWidget(self.generatedPasswordDisplay)
         
-        # Add the form widget to the stackedWidget
-        self.stackedWidget.addWidget(self.passwordGeneratorFormWidget)      
+        lengthLayout = QHBoxLayout()
+        lengthLayout.addWidget(QLabel("Password Length:"))
+        lengthLayout.addWidget(self.lengthSlider)
+        lengthLayout.addWidget(self.lengthSliderLabel)
+        generatorLayout.addLayout(lengthLayout)
+        
+        generatorLayout.addWidget(self.includeUppercaseCheckbox)
+        generatorLayout.addWidget(self.includeNumbersCheckbox)
+        generatorLayout.addWidget(self.includeSpecialCharsCheckbox)
+        generatorLayout.addWidget(self.generateButton)
+
+        # Signals
+        self.generateButton.clicked.connect(self.generate_password)
+        self.lengthSlider.valueChanged.connect(self.update_slider_value_label)
+
+        # Add this form widget to the stacked widget
+        self.stackedWidget.addWidget(self.passwordGeneratorFormWidget)
+
+    def update_slider_value_label(self):
+        self.lengthSliderLabel.setText(str(self.lengthSlider.value()))   
                 
     def submit_password_details(self):
         """Handles the submission of password details for both adding new and updating existing entries."""
@@ -486,5 +515,19 @@ class VaultWidget(QWidget):
         
     def generate_password(self):
         length = self.lengthSlider.value()
-        generated_password = PasswordGenerator.generate_password(length)
+        include_uppercase = self.includeUppercaseCheckbox.isChecked()
+        num_digits = int(self.numbersCountEdit.text())
+        num_special = int(self.specialCharsCountEdit.text())
+
+        # Validation: Ensure total specified characters do not exceed password length
+        if num_digits + num_special > length:
+            self.displayErrorMessage("Error: Specified digits and special characters exceed total length.")
+            return
+
+        generated_password = PasswordGenerator.generate_password(length, include_uppercase, num_digits, num_special)
+        self.generatedPasswordDisplay.setStyleSheet("color: black; font-weight: normal;")  # Reset style in case it was set by an error
         self.generatedPasswordDisplay.setText(generated_password)
+
+    def displayErrorMessage(self, message):
+        self.generatedPasswordDisplay.setStyleSheet("color: red; font-weight: bold;")
+        self.generatedPasswordDisplay.setText(message)
