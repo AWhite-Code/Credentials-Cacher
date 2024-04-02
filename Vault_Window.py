@@ -518,11 +518,22 @@ class VaultWidget(QWidget):
         include_uppercase = self.includeUppercaseCheckbox.isChecked()
         num_digits = int(self.numbersCountEdit.text())
         num_special = int(self.specialCharsCountEdit.text())
+        include_numbers = self.includeNumbersCheckbox.isChecked()
+        include_special = self.includeSpecialCharsCheckbox.isChecked()
 
-        # Validation: Ensure total specified characters do not exceed password length
+        # Check for errors
+        error_messages = []
         if num_digits + num_special > length:
-            self.displayPasswordOutput("Error: Specified digits and special characters exceed total length.", isError=True)
-            return  # Stop the function if there's an error
+            error_messages.append("Error: Specified digits and special characters exceed total length.")
+        if include_numbers and num_digits == 0:
+            error_messages.append("Error: Numbers are included, but count is set to 0.")
+        if include_special and num_special == 0:
+            error_messages.append("Error: Special characters are included, but count is set to 0.")
+
+        # If there are any error messages, display the first one and stop the function
+        if error_messages:
+            self.displayPasswordOutput(error_messages[0], isError=True)
+            return
 
         # Proceed with generating the password if validation passes
         generated_password = PasswordGenerator.generate_password(length, include_uppercase, num_digits, num_special)
