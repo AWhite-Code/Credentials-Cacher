@@ -1,7 +1,7 @@
 QWidget {
     font: 15px;
     color: #000000; /* Black text for readability */
-    background-color: #FFFFFF; /* White background */
+    background-color: #F7FAFA; /* White background */
 }
 
 QLineEdit, QTextEdit, QSlider {

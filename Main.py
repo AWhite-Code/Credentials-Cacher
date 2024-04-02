@@ -49,8 +49,10 @@ def main():
 
     settings = load_or_create_settings()
 
-    themeManager = ThemeManager(app)  # Pass the QApplication instance to the ThemeManager
-    if settings.get("darkMode"):
+    themeManager = ThemeManager(app)  # Initialize the theme manager with the QApplication instance
+
+    # Apply theme based on the darkMode setting from the JSON
+    if settings.get("dark_mode", False):
         themeManager.setTheme("dark")
     else:
         themeManager.setTheme("light")

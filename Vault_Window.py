@@ -500,6 +500,8 @@ class VaultWidget(QWidget):
     def changeMode(self, mode):
         self.currentMode = mode
         self.populate_vault()
+        # Assuming the vault view is at index 0 of the stackedWidget
+        self.stackedWidget.setCurrentIndex(0)
         
 
     def generate_password(self):

@@ -13,35 +13,6 @@ class LoginWidget(QWidget):
         self.on_show_other_frame = on_show_other_frame
         self.main_window = main_window 
         self.init_ui()
-        self.setStyleSheet("""
-                QWidget {
-                    font: 15px;
-                }
-                QLineEdit {
-                    border: 2px solid #a9a9a9;
-                    border-radius: 15px;
-                    padding: 5px;
-                    background-color: white;
-                    color: black;
-                }
-                QLineEdit:hover {
-                    border: 2px solid #f0f0f0;
-                }
-                QPushButton {
-                    border: 2px solid #a9a9a9;
-                    border-radius: 15px;
-                    padding: 5px;
-                    background-color: #0078d7;
-                    color: white;
-                }
-                QPushButton:hover {
-                    background-color: #0053a6;
-                }
-                QPushButton:pressed {
-                    background-color: #00397a;
-                }
-            """)
-        
 
     def init_ui(self):
         layout = QGridLayout(self)
