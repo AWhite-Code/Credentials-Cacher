@@ -1,19 +1,40 @@
-QWidget {font: 15px;}
-QLineEdit {
-    border: 2px solid #a9a9a9;
-    border-radius: 15px;
-    padding: 5px;
-    background-color: white;
-    color: black;
+QWidget {
+    font: 15px;
+    color: #000000; /* Black text for readability */
+    background-color: #FFFFFF; /* White background */
 }
-QLineEdit:hover {border: 2px solid #f0f0f0;}
-QPushButton {
-    border: 2px solid #a9a9a9;
+
+QLineEdit, QTextEdit, QSlider {
+    border: 2px solid #A9A9A9;
     border-radius: 15px;
     padding: 5px;
-    background-color: #F5C754;
-    color: black;
+    background-color: #F5F5F5; /* Slightly off-white for depth */
+    color: #000000; /* Black text */
+}
+
+QLineEdit:hover, QTextEdit:hover {
+    border: 2px solid #F5C754; /* Accent color for hover state */
+}
+
+QPushButton {
+    border: 2px solid #A9A9A9;
+    border-radius: 15px;
+    padding: 5px;
+    background-color: #F5F5F5; /* Light grey for buttons */
+    color: #000000; /* Black text for contrast */
     outline: none;
 }
-QPushButton:hover {background-color: #0053a6;}
-QPushButton:pressed {background-color: #00397a;}
+
+QPushButton:hover {
+    background-color: #F5C754; /* Accent color for hover state */
+    color: #333333; /* Dark text on hover for readability */
+}
+
+QPushButton:pressed {
+    background-color: #E5B644; /* Darker accent for pressed state */
+    color: #333333;
+}
+
+QLabel, QCheckBox {
+    color: #000000; /* Black text for readability */
+}
