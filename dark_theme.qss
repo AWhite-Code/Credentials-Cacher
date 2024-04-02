@@ -43,3 +43,18 @@ QPushButton[isSelected="true"] {
 QLabel, QCheckBox {
     color: #FFFFFF;
 }
+
+QSlider::groove:horizontal {
+    border: 1px solid #999999;
+    height: 6px; /* Adjust based on your UI needs */
+    margin: 2px 0px; /* Slightly increase side margins for the groove */
+}
+
+QSlider::handle:horizontal {
+    background: #2d2d2d;
+    border: 1px solid #5c5c5c;
+    width: 16px; /* Reduce the width of the handle if needed */
+    margin: -10px -9px; /* This affects the touch area, not visual size */
+    border-radius: 3px;
+    height: 20px;
+}

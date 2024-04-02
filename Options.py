@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QCheckBox, QSlider, QLabel, QPushButton
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QCheckBox, QSlider, QLabel, QPushButton, QHBoxLayout
 import json
 from PyQt5.QtCore import QSettings
 from utils import get_settings_path
@@ -21,22 +21,42 @@ class OptionsDialog(QDialog):
         self.passwordVisibilityToggle = QCheckBox("Always Show Passwords")
         self.layout.addWidget(self.passwordVisibilityToggle)
 
+        # Auto-Lock Toggle
+        self.autoLockEnabledCheckbox = QCheckBox("Enable Auto-Lock")
+        self.layout.addWidget(self.autoLockEnabledCheckbox)
+
         # Auto-Lock Timer
-        self.autoLockLabel = QLabel("Auto-lock timer (minutes):")
+        self.autoLockLayout = QHBoxLayout()
+        self.autoLockLabel = QLabel("Auto-lock timer (minutes): 5")  # Start at 5 minutes
         self.autoLockSlider = QSlider(Qt.Horizontal)
-        self.autoLockSlider.setMinimum(1)  # Minimum 1 minute
-        self.autoLockSlider.setMaximum(60)  # Maximum 60 minutes
-        self.autoLockSlider.setTickInterval(5)  # Tick every 5 minutes
+        self.autoLockSlider.setMinimum(1)  # 1 represents 5 minutes
+        self.autoLockSlider.setMaximum(12)  # 12 represents 60 minutes (12 * 5 = 60)
+        self.autoLockSlider.setTickInterval(1)  # Move in steps of 1
         self.autoLockSlider.setTickPosition(QSlider.TicksBelow)
-        self.autoLockValueLabel = QLabel("1")  # Default value
-        self.autoLockSlider.valueChanged.connect(self.updateAutoLockLabel)
-        self.layout.addWidget(self.autoLockLabel)
-        self.layout.addWidget(self.autoLockSlider)
-        self.layout.addWidget(self.autoLockValueLabel)
+        self.autoLockSlider.valueChanged.connect(lambda value: self.autoLockLabel.setText(f"Auto-lock timer (minutes): {value * 5}"))
+        self.autoLockLayout.addWidget(self.autoLockLabel)
+        self.autoLockLayout.addWidget(self.autoLockSlider)
+        self.layout.addLayout(self.autoLockLayout)
 
         # Clipboard Clearing
         self.clipboardClearingToggle = QCheckBox("Clear clipboard after copying password")
         self.layout.addWidget(self.clipboardClearingToggle)
+
+        # Clipboard Clearing Delay
+        self.clipboardClearDelayLayout = QHBoxLayout()
+        self.clipboardClearDelayLabel = QLabel("Clipboard clearing delay (minutes): 1")  # Start at 1 minute
+        self.clipboardClearDelaySlider = QSlider(Qt.Horizontal)
+        self.clipboardClearDelaySlider.setMinimum(1)  # 1 represents 1 minute
+        self.clipboardClearDelaySlider.setMaximum(5)  # Maximum 5 minutes
+        self.clipboardClearDelaySlider.setTickInterval(1)  # Move in steps of 1 minute
+        self.clipboardClearDelaySlider.setTickPosition(QSlider.TicksBelow)
+        self.clipboardClearDelaySlider.valueChanged.connect(lambda value: self.clipboardClearDelayLabel.setText(f"Clipboard clearing delay (minutes): {value}"))
+        self.clipboardClearDelayLayout.addWidget(self.clipboardClearDelayLabel)
+        self.clipboardClearDelayLayout.addWidget(self.clipboardClearDelaySlider)
+        self.layout.addLayout(self.clipboardClearDelayLayout)
+        
+        self.autoLockLayout.setContentsMargins(10, 0, 10, 0)  # Add left and right margins
+        self.clipboardClearDelayLayout.setContentsMargins(10, 0, 10, 0)  # Add left and right margins
 
         # OK and Cancel Buttons
         self.okButton = QPushButton("OK")
@@ -46,8 +66,8 @@ class OptionsDialog(QDialog):
         self.layout.addWidget(self.okButton)
         self.layout.addWidget(self.cancelButton)
 
-        # Load settings
         self.loadSettings()
+
         
     def updateAutoLockLabel(self, value):
         self.autoLockValueLabel.setText(str(value))
@@ -61,8 +81,12 @@ class OptionsDialog(QDialog):
                 self.passwordVisibilityToggle.setChecked(settings.get('show_passwords', False))
                 self.autoLockSlider.setValue(settings.get('auto_lock', 1))
                 self.clipboardClearingToggle.setChecked(settings.get('clear_clipboard', False))
+                # Assuming the settings.json now also includes these:
+                self.autoLockEnabledCheckbox.setChecked(settings.get('auto_lock_enabled', True))
+                self.clipboardClearDelaySlider.setValue(settings.get('clipboard_clear_delay', 30))
         except FileNotFoundError:
             pass  # File doesn't exist, proceed with default values
+
         
     def load_or_create_settings():
         # Use the function to get the path to your settings file
@@ -98,20 +122,18 @@ class OptionsDialog(QDialog):
         
     def accept(self):
         settings_path = get_settings_path()
-        dark_mode_enabled = self.darkModeToggle.isChecked()
-
-        # Save settings
         settings = {
-            'dark_mode': dark_mode_enabled,
+            'dark_mode': self.darkModeToggle.isChecked(),
             'show_passwords': self.passwordVisibilityToggle.isChecked(),
-            'auto_lock': self.autoLockSlider.value(),
-            'clear_clipboard': self.clipboardClearingToggle.isChecked()
+            'auto_lock_enabled': self.autoLockEnabledCheckbox.isChecked(),
+            'auto_lock': self.autoLockSlider.value() * 5,  # Convert slider value back to minutes
+            'clear_clipboard': self.clipboardClearingToggle.isChecked(),
+            'clipboard_clear_delay': self.clipboardClearDelaySlider.value()  # Already in minutes
         }
         with open(settings_path, 'w') as file:
             json.dump(settings, file, indent=4)
 
-        # Update the theme based on the dark mode setting
-        newTheme = "dark" if dark_mode_enabled else "light"
+        newTheme = "dark" if settings['dark_mode'] else "light"
         self.themeManager.setTheme(newTheme)
         self.parent().applyGlobalSettings() 
 
