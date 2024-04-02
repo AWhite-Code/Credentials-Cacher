@@ -210,14 +210,7 @@ class VaultWidget(QWidget):
 
         # This stretch is removed to allow the notesTextEdit to take the remaining space.
         # Now add the rightColumnLayout to the main content layout
-        self.mainContentLayout.addLayout(self.rightColumnLayout, 0)
-            
-
-    def toggle_view(self, stackedWidget):
-        if stackedWidget.currentIndex() == 0:
-            stackedWidget.setCurrentIndex(1)
-        else:
-            stackedWidget.setCurrentIndex(0)
+        self.mainContentLayout.addLayout(self.rightColumnLayout, 0)           
 
     def init_add_password_form(self):
         self.addPasswordFormWidget = QWidget()
@@ -258,12 +251,16 @@ class VaultWidget(QWidget):
         
 
     def toggle_add_password_form(self):
-        # Toggle between the vault view and the Add Password form
+        # Define index constants for readability
+        ADD_PASSWORD_FORM_INDEX = 1
+
         currentIndex = self.stackedWidget.currentIndex()
-        if currentIndex == 0:
-            self.stackedWidget.setCurrentIndex(1)  # Show Add Password form
-        else:
-            self.stackedWidget.setCurrentIndex(0)  # Show vault view
+        
+        # If we're not already viewing the add password form, switch to it
+        if currentIndex != ADD_PASSWORD_FORM_INDEX:
+            self.stackedWidget.setCurrentIndex(ADD_PASSWORD_FORM_INDEX)
+            self.clear_form_fields()  # Assuming you have a method to clear the form
+            self.current_edit_id = None  # Reset to ensure we're in "add mode"
             
     def init_password_generator_form(self):
         self.passwordGeneratorFormWidget = QWidget()
