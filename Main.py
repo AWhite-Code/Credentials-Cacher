@@ -4,37 +4,55 @@ from Window import MainWindow
 from Database import Database
 import logging
 import sys
-import json
 import os
+import json
 
-# Default settings
-default_settings = {
-    'dark_mode': False,
-    'show_passwords': True,
-    'auto_lock': 10,  # Default to 10 minutes
-    'clear_clipboard': True,
-}
+def get_settings_path():
+    app_data_path = os.getenv('APPDATA')
+    settings_directory = os.path.join(app_data_path, 'Credentials Cacher')
+    if not os.path.exists(settings_directory):
+        os.makedirs(settings_directory)
+    return os.path.join(settings_directory, 'settings.json')
 
-def initialize_settings(settings_file='settings.json', default_settings={}):
-    """Check for the existence of the settings file and create it with default settings if not found."""
-    if not os.path.exists(settings_file):
-        with open(settings_file, 'w') as file:
-            json.dump(default_settings, file)
+def load_or_create_settings():
+    settings_path = get_settings_path()
+    if not os.path.exists(settings_path):
+        # If the settings file doesn't exist, create a default settings dictionary
+        default_settings = {
+            "darkMode": False,
+            "zoomLevel": 100,
+            "passwordVisibility": False,
+            "autoLockTimer": 300,  # Example default value in seconds
+            "clipboardClearing": 30,  # Example default value in seconds
+            "passwordGenerator": {
+                "length": 12,
+                "includeUppercase": True,
+                "numDigits": 2,
+                "numSpecial": 2,
+                "includeNumbers": True,
+                "includeSpecial": True
+            }
+        }
+        # Save the default settings to the file
+        with open(settings_path, 'w') as file:
+            json.dump(default_settings, file, indent=4)
+    # Load the settings
+    with open(settings_path, 'r') as file:
+        return json.load(file)
 
 def main():
     db = Database()
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    app = QApplication(sys.argv)
 
-    # Enable high DPI scaling and use high DPI icons before QApplication instance is created
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)  # Enable high DPI scaling
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)  # Use high DPI icons
+    # Load or create settings at the start
+    settings = load_or_create_settings()
 
-    # Initialize default settings if the settings file does not exist
-    initialize_settings(default_settings=default_settings)
-
-    app = QApplication(sys.argv)  # Adjusted to pass sys.argv
-    main_window = MainWindow(db)  # Pass settings to MainWindow if necessary
-    main_window.show()  # Show the main window
-    sys.exit(app.exec_())  # Adjusted for proper application exit
+# Pass settings to MainWindow
+    main_window = MainWindow(db, settings)
+    main_window.show()
+    app.exec_()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

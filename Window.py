@@ -6,10 +6,15 @@ import os
 import pickle
 
 class MainWindow(QMainWindow):
-    def __init__(self, db):
+    def __init__(self, db, settings):
         super().__init__()
         self.db = db  # Save the db instance for later use
         self.encryption_key = None  # New attribute for storing the encryption key
+        
+        self.settings = settings  # Store settings
+
+        # Pass settings to VaultWidget
+        self.vault_widget = VaultWidget(self.db, self.settings, parent=self)
         
         self.setWindowTitle("Credentials Cacher")
         
@@ -26,7 +31,7 @@ class MainWindow(QMainWindow):
         # Initialize widgets
         self.login_widget = LoginWidget(self.toggle_widgets, self)
         self.registration_widget = RegistrationWidget(self.toggle_widgets)
-        self.vault_widget = VaultWidget(self.db, parent=self)
+        self.vault_widget = VaultWidget(self.db, self.settings, parent=self)
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)

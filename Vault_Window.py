@@ -5,16 +5,19 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
 from Password_Entry import PasswordEntryButton
 from Password_Generator import PasswordGenerator
+import json
+from utils import get_settings_path
 
 class VaultWidget(QWidget):
-    def __init__(self, db, parent=None):
+    def __init__(self, db, settings, parent=None):
         super().__init__(parent)
         self.db = db
+        self.settings = settings 
         self.selectedButton = None  # Track the selected button
         self.encryption_key = None
         self.currentMode = 'all'  # Default mode
-        self.initUI()
         self.current_edit_id = None  # None indicates "add mode"
+        self.initUI()
         
     def set_encryption_key(self, key):
         self.encryption_key = key
@@ -307,6 +310,14 @@ class VaultWidget(QWidget):
         generatorLayout.addWidget(self.includeNumbersCheckbox)
         generatorLayout.addWidget(self.includeSpecialCharsCheckbox)
         generatorLayout.addWidget(self.generateButton)
+        
+        pg_settings = self.settings.get("passwordGenerator", {})
+        self.lengthSlider.setValue(pg_settings.get("length", 12))
+        self.includeUppercaseCheckbox.setChecked(pg_settings.get("includeUppercase", True))
+        self.includeNumbersCheckbox.setChecked(pg_settings.get("includeNumbers", True))
+        self.includeSpecialCharsCheckbox.setChecked(pg_settings.get("includeSpecial", True))
+        self.numbersCountEdit.setText(str(pg_settings.get("numDigits", 2)))
+        self.specialCharsCountEdit.setText(str(pg_settings.get("numSpecial", 2)))
 
         # Signals
         self.generateButton.clicked.connect(self.generate_password)
@@ -513,6 +524,7 @@ class VaultWidget(QWidget):
         self.currentMode = mode
         self.populate_vault()
         
+
     def generate_password(self):
         length = self.lengthSlider.value()
         include_uppercase = self.includeUppercaseCheckbox.isChecked()
@@ -520,6 +532,17 @@ class VaultWidget(QWidget):
         num_special = int(self.specialCharsCountEdit.text())
         include_numbers = self.includeNumbersCheckbox.isChecked()
         include_special = self.includeSpecialCharsCheckbox.isChecked()
+
+        # Before proceeding with error checking and password generation, save the settings
+        settings = {
+            "length": length,
+            "includeUppercase": include_uppercase,
+            "numDigits": num_digits,
+            "numSpecial": num_special,
+            "includeNumbers": include_numbers,
+            "includeSpecial": include_special
+        }
+        self.savePasswordGeneratorSettings(settings)  # Call the function to save settings
 
         # Check for errors
         error_messages = []
@@ -538,6 +561,25 @@ class VaultWidget(QWidget):
         # Proceed with generating the password if validation passes
         generated_password = PasswordGenerator.generate_password(length, include_uppercase, num_digits, num_special)
         self.displayPasswordOutput(generated_password, isError=False)
+
+
+    def savePasswordGeneratorSettings(self, settings):
+        settings_file_path = get_settings_path()  # Use the function to get the path to settings.json in AppData
+        
+        try:
+            # Read the existing settings file
+            with open(settings_file_path, 'r') as file:
+                existing_settings = json.load(file)
+        except FileNotFoundError:
+            # If the file doesn't exist, start with empty settings
+            existing_settings = {}
+
+        # Update the password generator settings within the existing settings
+        existing_settings["passwordGenerator"] = settings
+
+        # Write the updated settings back to the file
+        with open(settings_file_path, 'w') as file:
+            json.dump(existing_settings, file, indent=4)
 
     def displayPasswordOutput(self, message, isError=False):
         """
