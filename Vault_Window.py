@@ -7,6 +7,8 @@ from Password_Entry import PasswordEntryButton
 from Password_Generator import PasswordGenerator
 import json
 from utils import get_settings_path
+from Options import OptionsDialog
+
 
 class VaultWidget(QWidget):
     def __init__(self, db, settings, parent=None):
@@ -38,14 +40,15 @@ class VaultWidget(QWidget):
         titleLabel = QLabel("Credentials Cachers")
         self.searchLineEdit = QLineEdit()
         self.searchLineEdit.setPlaceholderText("Search...")
-        optionsButton = QPushButton("Options")
+        self.optionsButton = QPushButton("Options")
+        self.optionsButton.clicked.connect(self.showOptionsDialog)
         
         # Connect the textChanged signal to the search_vault method
         self.searchLineEdit.textChanged.connect(self.search_vault)
         
         self.topBarLayout.addWidget(titleLabel)
         self.topBarLayout.addWidget(self.searchLineEdit)
-        self.topBarLayout.addWidget(optionsButton)
+        self.topBarLayout.addWidget(self.optionsButton)
         
         self.mainLayout.addLayout(self.topBarLayout)
 
@@ -314,6 +317,12 @@ class VaultWidget(QWidget):
         # Connect signals
         self.generateButton.clicked.connect(self.generate_password)
         self.lengthSlider.valueChanged.connect(lambda: self.lengthSliderLabel.setText(str(self.lengthSlider.value())))
+        self.includeUppercaseCheckbox.stateChanged.connect(self.saveSettingsOnChange)
+        self.includeNumbersCheckbox.stateChanged.connect(self.saveSettingsOnChange)
+        self.includeSpecialCharsCheckbox.stateChanged.connect(self.saveSettingsOnChange)
+        self.numbersCountEdit.textChanged.connect(self.saveSettingsOnChange)
+        self.specialCharsCountEdit.textChanged.connect(self.saveSettingsOnChange)
+        self.lengthSlider.valueChanged.connect(self.saveSettingsOnChange)
 
         # Finally, add the form widget to the stacked widget
         self.stackedWidget.addWidget(self.passwordGeneratorFormWidget)
@@ -555,20 +564,28 @@ class VaultWidget(QWidget):
         self.displayPasswordOutput(generated_password, isError=False)
 
 
+    def saveSettingsOnChange(self):
+        # This method will be called whenever a related widget's state changes.
+        settings = {
+            "length": self.lengthSlider.value(),
+            "includeUppercase": self.includeUppercaseCheckbox.isChecked(),
+            "numDigits": int(self.numbersCountEdit.text()) if self.numbersCountEdit.text().isdigit() else 0,
+            "numSpecial": int(self.specialCharsCountEdit.text()) if self.specialCharsCountEdit.text().isdigit() else 0,
+            "includeNumbers": self.includeNumbersCheckbox.isChecked(),
+            "includeSpecial": self.includeSpecialCharsCheckbox.isChecked()
+        }
+        self.savePasswordGeneratorSettings(settings)
+
     def savePasswordGeneratorSettings(self, settings):
         settings_path = get_settings_path()
         try:
-            # Read the existing settings file
             with open(settings_path, 'r') as file:
                 existing_settings = json.load(file)
         except FileNotFoundError:
-            # If the file doesn't exist, start with empty settings
             existing_settings = {}
 
-        # Update the password generator settings within the existing settings
         existing_settings["passwordGenerator"] = settings
 
-        # Write the updated settings back to the file
         with open(settings_path, 'w') as file:
             json.dump(existing_settings, file, indent=4)
 
@@ -585,3 +602,7 @@ class VaultWidget(QWidget):
             self.generatedPasswordDisplay.setStyleSheet("color: black; font-weight: normal;")
 
         self.generatedPasswordDisplay.setText(message)
+        
+    def showOptionsDialog(self):
+        dialog = OptionsDialog(self)
+        dialog.exec_()

@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QStackedWidget
+from PyQt5.QtCore import QTimer
 from Login import LoginWidget
 from Vault_Window import VaultWidget
 from Registration import RegistrationWidget
@@ -41,6 +42,11 @@ class MainWindow(QMainWindow):
         # Decide which widget to show on start
         self.current_widget = self.login_widget if self.check_credentials_exist() else self.registration_widget
         self.stacked_widgets.setCurrentWidget(self.current_widget)
+        
+        self.autoLockTimer = QTimer(self)
+        self.autoLockTimer.timeout.connect(self.lockApplication)
+        # Set the interval based on settings
+        self.autoLockTimer.start(settings["autoLockTimer"] * 1000)
 
     def toggle_widgets(self):
         if self.stacked_widgets.currentWidget() == self.login_widget:

@@ -20,7 +20,6 @@ def load_or_create_settings():
         # If the settings file doesn't exist, create a default settings dictionary
         default_settings = {
             "darkMode": False,
-            "zoomLevel": 100,
             "passwordVisibility": False,
             "autoLockTimer": 300,  # Example default value in seconds
             "clipboardClearing": 30,  # Example default value in seconds
