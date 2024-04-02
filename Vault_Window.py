@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox, QDialog
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox, QDialog, QApplication
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
 from Password_Entry import PasswordEntryButton
 from Password_Generator import PasswordGenerator
@@ -21,6 +21,7 @@ class VaultWidget(QWidget):
         self.encryption_key = None
         self.currentMode = 'all'  # Default mode
         self.current_edit_id = None  # None indicates "add mode"
+        self.initAutoLockTimer()
         self.initUI()
         
     def set_encryption_key(self, key):
@@ -601,5 +602,16 @@ class VaultWidget(QWidget):
         self.settings = OptionsDialog.load_or_create_settings()  # Adjust this line accordingly
         self.applyPasswordVisibility()
         
-        
+    def initAutoLockTimer(self):
+        self.autoLockTimer = QTimer(self)
+        self.autoLockTimer.timeout.connect(self.lockApplication)
+        self.updateAutoLockSettings()
+
+    def updateAutoLockSettings(self):
+        auto_lock_enabled = self.settings.get('auto_lock_enabled', True)
+        auto_lock_duration = self.settings.get('auto_lock', 5)  # default to 5 minutes
+        if auto_lock_enabled:
+            self.autoLockTimer.start(auto_lock_duration * 60000)  # converting minutes to milliseconds
+        else:
+            self.autoLockTimer.stop()
 

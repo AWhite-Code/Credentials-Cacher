@@ -37,26 +37,8 @@ class OptionsDialog(QDialog):
         self.autoLockLayout.addWidget(self.autoLockLabel)
         self.autoLockLayout.addWidget(self.autoLockSlider)
         self.layout.addLayout(self.autoLockLayout)
-
-        # Clipboard Clearing
-        self.clipboardClearingToggle = QCheckBox("Clear clipboard after copying password")
-        self.layout.addWidget(self.clipboardClearingToggle)
-
-        # Clipboard Clearing Delay
-        self.clipboardClearDelayLayout = QHBoxLayout()
-        self.clipboardClearDelayLabel = QLabel("Clipboard clearing delay (minutes): 1")  # Start at 1 minute
-        self.clipboardClearDelaySlider = QSlider(Qt.Horizontal)
-        self.clipboardClearDelaySlider.setMinimum(1)  # 1 represents 1 minute
-        self.clipboardClearDelaySlider.setMaximum(5)  # Maximum 5 minutes
-        self.clipboardClearDelaySlider.setTickInterval(1)  # Move in steps of 1 minute
-        self.clipboardClearDelaySlider.setTickPosition(QSlider.TicksBelow)
-        self.clipboardClearDelaySlider.valueChanged.connect(lambda value: self.clipboardClearDelayLabel.setText(f"Clipboard clearing delay (minutes): {value}"))
-        self.clipboardClearDelayLayout.addWidget(self.clipboardClearDelayLabel)
-        self.clipboardClearDelayLayout.addWidget(self.clipboardClearDelaySlider)
-        self.layout.addLayout(self.clipboardClearDelayLayout)
         
         self.autoLockLayout.setContentsMargins(10, 0, 10, 0)  # Add left and right margins
-        self.clipboardClearDelayLayout.setContentsMargins(10, 0, 10, 0)  # Add left and right margins
 
         # OK and Cancel Buttons
         self.okButton = QPushButton("OK")
@@ -80,10 +62,8 @@ class OptionsDialog(QDialog):
                 self.darkModeToggle.setChecked(settings.get('dark_mode', False))
                 self.passwordVisibilityToggle.setChecked(settings.get('show_passwords', False))
                 self.autoLockSlider.setValue(settings.get('auto_lock', 1))
-                self.clipboardClearingToggle.setChecked(settings.get('clear_clipboard', False))
                 # Assuming the settings.json now also includes these:
                 self.autoLockEnabledCheckbox.setChecked(settings.get('auto_lock_enabled', True))
-                self.clipboardClearDelaySlider.setValue(settings.get('clipboard_clear_delay', 30))
         except FileNotFoundError:
             pass  # File doesn't exist, proceed with default values
 
@@ -99,7 +79,6 @@ class OptionsDialog(QDialog):
                 "darkMode": False,
                 "passwordVisibility": False,
                 "autoLockTimer": 300,  # Example: 300 seconds
-                "clipboardClearing": 30,  # Example: 30 seconds
                 "passwordGenerator": {
                     "length": 12,
                     "includeUppercase": True,
@@ -127,8 +106,6 @@ class OptionsDialog(QDialog):
             'show_passwords': self.passwordVisibilityToggle.isChecked(),
             'auto_lock_enabled': self.autoLockEnabledCheckbox.isChecked(),
             'auto_lock': self.autoLockSlider.value() * 5,  # Convert slider value back to minutes
-            'clear_clipboard': self.clipboardClearingToggle.isChecked(),
-            'clipboard_clear_delay': self.clipboardClearDelaySlider.value()  # Already in minutes
         }
         with open(settings_path, 'w') as file:
             json.dump(settings, file, indent=4)
