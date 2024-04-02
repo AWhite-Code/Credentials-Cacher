@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from Window import MainWindow
 from Database import Database
 from Thememanager import ThemeManager  # Assuming you have a ThemeManager class defined
+from Options import OptionsDialog
 import logging
 import sys
 import os
@@ -15,39 +16,13 @@ def get_settings_path():
         os.makedirs(settings_directory)
     return os.path.join(settings_directory, 'settings.json')
 
-def load_or_create_settings():
-    settings_path = get_settings_path()
-    if not os.path.exists(settings_path):
-        # If the settings file doesn't exist, create a default settings dictionary
-        default_settings = {
-            "darkMode": False,
-            "passwordVisibility": False,
-            "autoLockTimer": 300,  # Example default value in seconds
-            "clipboardClearing": 30,  # Example default value in seconds
-            "passwordGenerator": {
-                "length": 12,
-                "includeUppercase": True,
-                "numDigits": 2,
-                "numSpecial": 2,
-                "includeNumbers": True,
-                "includeSpecial": True
-            }
-        }
-        # Save the default settings to the file
-        with open(settings_path, 'w') as file:
-            json.dump(default_settings, file, indent=4)
-    # Load the settings
-    with open(settings_path, 'r') as file:
-        return json.load(file)
-
-
 def main():
     db = Database()
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     app = QApplication(sys.argv)
 
-    settings = load_or_create_settings()
+    settings = OptionsDialog.load_or_create_settings()
 
     themeManager = ThemeManager(app)  # Initialize the theme manager with the QApplication instance
 

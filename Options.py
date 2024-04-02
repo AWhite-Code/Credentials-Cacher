@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QCheckBox, QSlider, QLabel, QP
 import json
 from PyQt5.QtCore import QSettings
 from utils import get_settings_path
+import os
 
 
 class OptionsDialog(QDialog):
@@ -62,7 +63,39 @@ class OptionsDialog(QDialog):
                 self.clipboardClearingToggle.setChecked(settings.get('clear_clipboard', False))
         except FileNotFoundError:
             pass  # File doesn't exist, proceed with default values
-
+        
+    def load_or_create_settings():
+        # Use the function to get the path to your settings file
+        settings_path = get_settings_path()
+        
+        # Check if the settings file exists
+        if not os.path.exists(settings_path):
+            # If it doesn't exist, create a default settings object
+            default_settings = {
+                "darkMode": False,
+                "passwordVisibility": False,
+                "autoLockTimer": 300,  # Example: 300 seconds
+                "clipboardClearing": 30,  # Example: 30 seconds
+                "passwordGenerator": {
+                    "length": 12,
+                    "includeUppercase": True,
+                    "numDigits": 2,
+                    "numSpecial": 2,
+                    "includeNumbers": True,
+                    "includeSpecial": True
+                }
+            }
+            # Save the default settings to a new file
+            with open(settings_path, 'w') as file:
+                json.dump(default_settings, file, indent=4)
+            # Return the default settings
+            return default_settings
+        
+        # If the file exists, load the settings from the file
+        with open(settings_path, 'r') as file:
+            settings = json.load(file)
+            return settings
+        
     def accept(self):
         settings_path = get_settings_path()
         dark_mode_enabled = self.darkModeToggle.isChecked()
@@ -80,5 +113,6 @@ class OptionsDialog(QDialog):
         # Update the theme based on the dark mode setting
         newTheme = "dark" if dark_mode_enabled else "light"
         self.themeManager.setTheme(newTheme)
+        self.parent().applyGlobalSettings() 
 
         super().accept()

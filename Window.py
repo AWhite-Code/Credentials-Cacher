@@ -82,3 +82,5 @@ class MainWindow(QMainWindow):
         self.db.close_connection()
         
         event.accept()  # Close the PYQT window normally
+        
+        

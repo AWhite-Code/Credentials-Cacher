@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox, QDialog
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
@@ -8,6 +8,7 @@ from Password_Generator import PasswordGenerator
 import json
 from utils import get_settings_path
 from Options import OptionsDialog
+from ClickableLineEdit import ClickableLineEdit
 
 
 class VaultWidget(QWidget):
@@ -34,6 +35,7 @@ class VaultWidget(QWidget):
         self.setupTopBar()
         self.setupMainContent()
         self.stackedWidget.setCurrentIndex(0)
+        self.applyPasswordVisibility()
 
     def setupTopBar(self):
         self.topBarLayout = QHBoxLayout()
@@ -148,9 +150,7 @@ class VaultWidget(QWidget):
 
     def setupRightColumn(self):
         self.rightColumnLayout = QVBoxLayout()
-
-        # Explicitly setting spacing and margins for overall right column layout
-        self.rightColumnLayout.setSpacing(25)  # Adjust this value as needed for space between different rows
+        self.rightColumnLayout.setSpacing(25)
         self.rightColumnLayout.setContentsMargins(10, 10, 10, 10)
 
         # Name row setup
@@ -174,9 +174,14 @@ class VaultWidget(QWidget):
         # Password row setup
         passwordRowLayout = QHBoxLayout()
         passwordLabel = QLabel("Password:")
-        self.passwordLineEdit = QLineEdit()
+        
+        # Use ClickableLineEdit for the password field
+        self.passwordLineEdit = ClickableLineEdit()  # Replace QLineEdit with ClickableLineEdit
         self.passwordLineEdit.setMaximumWidth(190)
-        self.passwordLineEdit.setReadOnly(True)
+        self.passwordLineEdit.setReadOnly(True)  # It starts as read-only, clicking will toggle visibility
+        # Apply global visibility setting from the start
+        self.applyPasswordVisibility()  # Make sure this is defined and updates the visibility based on global settings
+        
         passwordRowLayout.addWidget(passwordLabel)
         passwordRowLayout.addWidget(self.passwordLineEdit)
 
@@ -189,18 +194,18 @@ class VaultWidget(QWidget):
         sitenameRowLayout.addWidget(sitenameLabel)
         sitenameRowLayout.addWidget(self.sitenameLineEdit)
         
-        self.lastUpdatedLabel = QLabel("Last Updated: Not available")  # Initial text
-
-        # Notes section setup, with minimized spacing between label and text edit
+        self.lastUpdatedLabel = QLabel("Last Updated: Not available")
+        
+        # Notes section setup
         notesLayout = QVBoxLayout()
-        notesLayout.setSpacing(10)  # No space between the label and the text edit
+        notesLayout.setSpacing(10)
         notesLabel = QLabel("Notes:")
         notesLayout.addWidget(notesLabel)
         self.notesTextEdit = QTextEdit()
         self.notesTextEdit.setReadOnly(True)
         notesLayout.addWidget(self.notesTextEdit)
 
-        # Adding row layouts and the notes section layout to the right column layout
+        # Add layouts to the right column layout
         self.rightColumnLayout.addLayout(nameRowLayout)
         self.rightColumnLayout.addLayout(usernameRowLayout)
         self.rightColumnLayout.addLayout(passwordRowLayout)
@@ -208,9 +213,7 @@ class VaultWidget(QWidget):
         self.rightColumnLayout.addWidget(self.lastUpdatedLabel)
         self.rightColumnLayout.addLayout(notesLayout)
 
-        # This stretch is removed to allow the notesTextEdit to take the remaining space.
-        # Now add the rightColumnLayout to the main content layout
-        self.mainContentLayout.addLayout(self.rightColumnLayout, 0)           
+        self.mainContentLayout.addLayout(self.rightColumnLayout, 0)
 
     def init_add_password_form(self):
         self.addPasswordFormWidget = QWidget()
@@ -247,7 +250,10 @@ class VaultWidget(QWidget):
         formLayout.setSpacing(50)
 
         # Add the form widget to the stackedWidget
-        self.stackedWidget.addWidget(self.addPasswordFormWidget)
+        
+        self.passwordLineEdit = QLineEdit()
+        password_echo_mode = QLineEdit.EchoMode.Normal if self.settings.get('show_passwords', False) else QLineEdit.EchoMode.Password
+        self.passwordLineEdit.setEchoMode(password_echo_mode)
         
 
     def toggle_add_password_form(self):
@@ -580,4 +586,20 @@ class VaultWidget(QWidget):
         
     def showOptionsDialog(self):
         optionsDialog = OptionsDialog(self.themeManager, self)
-        optionsDialog.exec_()
+        if optionsDialog.exec_() == QDialog.Accepted:
+            self.applyGlobalSettings() 
+        
+    def applyPasswordVisibility(self):
+        # Extract the global setting for password visibility
+        show_passwords = self.settings.get('show_passwords', False)
+
+        # Update the visibility setting for all password fields
+        self.passwordLineEdit.applyGlobalVisibilitySetting(show_passwords)
+        
+    def applyGlobalSettings(self):
+        # Assuming settings are loaded from a shared settings manager or utility
+        self.settings = OptionsDialog.load_or_create_settings()  # Adjust this line accordingly
+        self.applyPasswordVisibility()
+        
+        
+
