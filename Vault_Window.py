@@ -12,16 +12,16 @@ from ClickableLineEdit import ClickableLineEdit
 
 
 class VaultWidget(QWidget):
-    def __init__(self, db, settings, themeManager, parent=None):
+    def __init__(self, db, settings, themeManager, mainWindow, parent=None):
         super().__init__(parent)
         self.db = db
         self.settings = settings
         self.themeManager = themeManager
+        self.mainWindow = mainWindow
         self.selectedButton = None  # Track the selected button
         self.encryption_key = None
         self.currentMode = 'all'  # Default mode
         self.current_edit_id = None  # None indicates "add mode"
-        self.initAutoLockTimer()
         self.initUI()
         
     def set_encryption_key(self, key):
@@ -335,6 +335,7 @@ class VaultWidget(QWidget):
         self.lengthSliderLabel.setText(str(self.lengthSlider.value()))   
                 
     def submit_password_details(self):
+        self.mainWindow.resetAutoLockTimer()
         """Handles the submission of password details for both adding new and updating existing entries."""
         website_name = self.website_name_entry.text()
         website_url = self.website_url_entry.text()
@@ -378,6 +379,7 @@ class VaultWidget(QWidget):
         self.notes_entry.clear()
     
     def populate_vault(self, entries=None, reselect_entry_id=None):
+        self.mainWindow.resetAutoLockTimer()
         """Fetch and display entries using the current encryption key."""
         if self.selectedButton:
             self.selectedButton.setSelected(False)
@@ -413,6 +415,7 @@ class VaultWidget(QWidget):
                 self.selectedButton = button
                 
     def search_vault(self):
+        self.mainWindow.resetAutoLockTimer()
         """Filter and display entries based on the search query using the current encryption key."""
         if not self.encryption_key:
             self.populate_vault([])  # Clear the display if there's no encryption key
@@ -439,6 +442,7 @@ class VaultWidget(QWidget):
 
 
     def display_entry_details(self, entry_data, button):
+        self.mainWindow.resetAutoLockTimer()
         # Deselect the previously selected button, if any
         if self.selectedButton is not None:
             # Ensure the previously selected button's style is reset
@@ -467,12 +471,14 @@ class VaultWidget(QWidget):
                     widget.setFixedWidth(buttonWidth)
 
     def resizeEvent(self, event):
+        self.mainWindow.resetAutoLockTimer()
         """Handles the widget's resize event and adjusts button widths."""
         self.adjustButtonWidth()
         super().resizeEvent(event)
         
         
     def delete_Entry(self, entry_id):
+        self.mainWindow.resetAutoLockTimer()
         print("Deleting entry with ID:", entry_id)
         self.db.delete_password_entry(entry_id)
 
@@ -483,6 +489,7 @@ class VaultWidget(QWidget):
             self.populate_vault()
             
     def enter_Edit_Mode(self, entry_data):
+        self.mainWindow.resetAutoLockTimer()
         print("Entering edit mode for entry:", entry_data[0])
         """Prepares and shows the add/edit form with pre-filled entry data for editing."""
         self.website_name_entry.setText(entry_data[1])
@@ -496,12 +503,14 @@ class VaultWidget(QWidget):
         self.stackedWidget.setCurrentIndex(1)
         
     def handleToggleFavourite(self, entry_id, current_status):
+        self.mainWindow.resetAutoLockTimer()
         new_status = not current_status
         self.db.toggle_favourite_status(entry_id, new_status)
         # Use the currently selected entry's ID to refresh and reselect the entry
         self.populate_vault(reselect_entry_id=entry_id)
 
     def changeMode(self, mode):
+        self.mainWindow.resetAutoLockTimer()
         self.currentMode = mode
         self.populate_vault()
         # Assuming the vault view is at index 0 of the stackedWidget
@@ -509,12 +518,15 @@ class VaultWidget(QWidget):
         
 
     def generate_password(self):
+        self.mainWindow.resetAutoLockTimer()
+        
         length = self.lengthSlider.value()
         include_uppercase = self.includeUppercaseCheckbox.isChecked()
         num_digits = int(self.numbersCountEdit.text())
         num_special = int(self.specialCharsCountEdit.text())
         include_numbers = self.includeNumbersCheckbox.isChecked()
         include_special = self.includeSpecialCharsCheckbox.isChecked()
+        
 
         # Before proceeding with error checking and password generation, save the settings
         settings = {
@@ -556,6 +568,7 @@ class VaultWidget(QWidget):
             "includeNumbers": self.includeNumbersCheckbox.isChecked(),
             "includeSpecial": self.includeSpecialCharsCheckbox.isChecked()
         }
+        self.mainWindow.resetAutoLockTimer()
         self.savePasswordGeneratorSettings(settings)
 
     def savePasswordGeneratorSettings(self, settings):
@@ -601,17 +614,4 @@ class VaultWidget(QWidget):
         # Assuming settings are loaded from a shared settings manager or utility
         self.settings = OptionsDialog.load_or_create_settings()  # Adjust this line accordingly
         self.applyPasswordVisibility()
-        
-    def initAutoLockTimer(self):
-        self.autoLockTimer = QTimer(self)
-        self.autoLockTimer.timeout.connect(self.lockApplication)
-        self.updateAutoLockSettings()
-
-    def updateAutoLockSettings(self):
-        auto_lock_enabled = self.settings.get('auto_lock_enabled', True)
-        auto_lock_duration = self.settings.get('auto_lock', 5)  # default to 5 minutes
-        if auto_lock_enabled:
-            self.autoLockTimer.start(auto_lock_duration * 60000)  # converting minutes to milliseconds
-        else:
-            self.autoLockTimer.stop()
 

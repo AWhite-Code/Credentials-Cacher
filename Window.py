@@ -14,9 +14,15 @@ class MainWindow(QMainWindow):
         self.settings = settings  # Store settings
         self.themeManager = themeManager
         self.encryption_key = None  # New attribute for storing the encryption key
+        
+        self.autoLockTimer = QTimer(self)
+        self.autoLockTimer.timeout.connect(self.logout)
+        # Initialize the auto-lock timer based on settings, if auto-lock is enabled
+        if settings.get("auto_lock_enabled", True):
+            self.setAutoLockInterval(settings.get("auto_lock", 5))  # Default to 5 minutes if not set
 
         # Pass settings to VaultWidget
-        self.vault_widget = VaultWidget(self.db, self.settings, self.themeManager, parent=self)
+        self.vault_widget = VaultWidget(self.db, self.settings, self.themeManager, self, parent=self)
         
         self.setWindowTitle("Credentials Cacher")
         
@@ -43,11 +49,6 @@ class MainWindow(QMainWindow):
         self.current_widget = self.login_widget if self.check_credentials_exist() else self.registration_widget
         self.stacked_widgets.setCurrentWidget(self.current_widget)
         
-        
-        #self.autoLockTimer = QTimer(self)
-        #self.autoLockTimer.timeout.connect(self.lockApplication)
-        # Set the interval based on settings
-        #self.autoLockTimer.start(settings["autoLockTimer"] * 1000)
 
     def toggle_widgets(self):
         if self.stacked_widgets.currentWidget() == self.login_widget:
@@ -82,5 +83,31 @@ class MainWindow(QMainWindow):
         self.db.close_connection()
         
         event.accept()  # Close the PYQT window normally
+        
+    def setAutoLockInterval(self, minutes):
+        """Set the auto-lock timer interval and start the timer."""
+        self.autoLockTimer.start(minutes * 60 * 1000)  # Convert minutes to milliseconds
+        
+    def resetAutoLockTimer(self):
+        if self.settings.get("auto_lock_enabled", True):
+            self.autoLockTimer.start(self.settings.get("auto_lock", 5) * 60 * 1000)
+
+    def logout(self):
+        """Handle logging out, clearing the encryption key, and switching to the login screen."""
+        self.clear_encryption_key()  # Clear the encryption key
+        self.stacked_widgets.setCurrentWidget(self.login_widget)  # Switch to login screen
+        # Reset any necessary states or fields in the login screen
+        self.login_widget.reset_state()
+        
+    def applyGlobalSettings(self):
+        # Example: Apply theme settings
+        newTheme = "dark" if self.settings['dark_mode'] else "light"
+        self.themeManager.setTheme(newTheme)
+        
+        # Example: Reconfigure auto-lock timer
+        if self.settings.get("auto_lock_enabled", True):
+            self.setAutoLockInterval(self.settings.get("auto_lock", 5))
+        else:
+            self.autoLockTimer.stop()
         
         

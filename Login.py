@@ -87,3 +87,9 @@ class LoginWidget(QWidget):
         except FileNotFoundError:
             QMessageBox.critical(self, "Error", "Global salt file not found.")
             return None
+
+    def reset_state(self):
+        """Reset the login form to its default state."""
+        self.username_entry.clear()
+        self.password_entry.clear()
+        self.remember_check.setChecked(False)
