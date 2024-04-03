@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 
         # Initialize widgets
         self.login_widget = LoginWidget(self.toggle_widgets, self)
-        self.registration_widget = RegistrationWidget(self.toggle_widgets)
+        self.registration_widget = RegistrationWidget(self)
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)

@@ -1,53 +1,73 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QGridLayout, QMessageBox
+from PyQt5.QtWidgets import (
+    QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QMessageBox
+)
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 import re
 import pickle
-from Hashing import Hashing
+from Hashing import Hashing  # Ensure you have this module or similar functionality
 
 class RegistrationWidget(QWidget):
-    def __init__(self, toggle_to_login):
-        super().__init__()
-        self.toggle_to_login = toggle_to_login
-        self.initUI()
+    def __init__(self, main_window, parent=None):
+        super().__init__(parent)
+        self.main_window = main_window
+        self.init_ui()
 
-    def initUI(self):
-        layout = QVBoxLayout()
+    def init_ui(self):
+        self.setLayout(QVBoxLayout())
+        self.layout().setAlignment(Qt.AlignCenter)
 
-        titleLabel = QLabel("Register")
-        titleLabel.setAlignment(Qt.AlignCenter)
+        # Main horizontal layout to split logo and form
+        main_horizontal_layout = QHBoxLayout()
 
-        # Using QGridLayout for input fields and labels
-        gridLayout = QGridLayout()
+        # Logo setup with dark theme logic
+        logo_label = QLabel(self)
+        dark_mode = self.main_window.settings.get('dark_mode', False)
+        logo_path = "Icons/logo_white.png" if dark_mode else "Icons/logo.png"
+        pixmap = QPixmap(logo_path)
+        logo_label.setPixmap(pixmap.scaled(320, 320, Qt.KeepAspectRatio))
+        main_horizontal_layout.addWidget(logo_label)
 
-        self.username_entry = QLineEdit()
+        # Form elements setup
+        form_layout = QVBoxLayout()
+        form_layout.setAlignment(Qt.AlignCenter)
+
+        # Username with label above
+        username_label = QLabel("Username:")
+        form_layout.addWidget(username_label)
+        self.username_entry = QLineEdit(self)
         self.username_entry.setPlaceholderText("Username...")
-        
-        self.password_entry = QLineEdit()
+        form_layout.addWidget(self.username_entry)
+
+        form_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Small spacer after username
+
+        # Password with label above
+        password_label = QLabel("Password:")
+        form_layout.addWidget(password_label)
+        self.password_entry = QLineEdit(self)
         self.password_entry.setPlaceholderText("Password...")
         self.password_entry.setEchoMode(QLineEdit.Password)
-        
-        self.confirm_password_entry = QLineEdit()
+        form_layout.addWidget(self.password_entry)
+
+        form_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Small spacer after password
+
+        # Confirm Password with label above
+        confirm_password_label = QLabel("Re-enter Password:")
+        form_layout.addWidget(confirm_password_label)
+        self.confirm_password_entry = QLineEdit(self)
         self.confirm_password_entry.setPlaceholderText("Confirm Password...")
         self.confirm_password_entry.setEchoMode(QLineEdit.Password)
-        
-        password_requirements_label = QLabel("Password requirements:\n- Minimum 8 characters\n- At least one number\n- At least one special character")
+        form_layout.addWidget(self.confirm_password_entry)
 
-        self.register_button = QPushButton("Register")
+        form_layout.addItem(QSpacerItem(20, 30, QSizePolicy.Minimum, QSizePolicy.Expanding))  # Larger spacer before register button
+
+        # Register button
+        self.register_button = QPushButton("Register", self)
+        form_layout.addWidget(self.register_button)
         self.register_button.clicked.connect(self.register_action)
 
-        self.switch_button = QPushButton("Switch to Login")
-        self.switch_button.clicked.connect(self.toggle_to_login)
-
-        gridLayout.addWidget(self.username_entry, 0, 0, 1, 2)
-        gridLayout.addWidget(self.password_entry, 1, 0, 1, 2)
-        gridLayout.addWidget(self.confirm_password_entry, 2, 0, 1, 2)
-        gridLayout.addWidget(password_requirements_label, 3, 0, 1, 2)
-        gridLayout.addWidget(self.register_button, 4, 0)
-        gridLayout.addWidget(self.switch_button, 4, 1)
-
-        layout.addWidget(titleLabel)
-        layout.addLayout(gridLayout)
-        self.setLayout(layout)
+        main_horizontal_layout.addLayout(form_layout)
+        self.layout().addLayout(main_horizontal_layout)
 
     def register_action(self):
         username = self.username_entry.text()

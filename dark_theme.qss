@@ -5,7 +5,7 @@ QWidget {
 }
 
 QLineEdit, QTextEdit, QSlider {
-    border: 2px solid #777777;
+    border: 1px solid #777777;
     border-radius: 15px;
     padding: 5px;
     background-color: #555555;
@@ -13,11 +13,11 @@ QLineEdit, QTextEdit, QSlider {
 }
 
 QLineEdit:hover, QTextEdit:hover {
-    border: 2px solid #F5C754;
+    border: 1px solid #F5C754;
 }
 
 QPushButton {
-    border: 2px solid #777777;
+    border: 1px solid #777777;
     border-radius: 15px;
     padding: 5px;
     background-color: #555555;

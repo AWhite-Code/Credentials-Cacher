@@ -5,7 +5,7 @@ QWidget {
 }
 
 QLineEdit, QTextEdit, QSlider {
-    border: 2px solid #A9A9A9;
+    border: 1px solid #A9A9A9;
     border-radius: 15px;
     padding: 5px;
     background-color: #F5F5F5; /* Slightly off-white for depth */
@@ -13,11 +13,11 @@ QLineEdit, QTextEdit, QSlider {
 }
 
 QLineEdit:hover, QTextEdit:hover {
-    border: 2px solid #F5C754; /* Accent color for hover state */
+    border: 1px solid #F5C754; /* Accent color for hover state */
 }
 
 QPushButton {
-    border: 2px solid #A9A9A9;
+    border: 1px solid #A9A9A9;
     border-radius: 15px;
     padding: 5px;
     background-color: #F5F5F5; /* Light grey for buttons */
