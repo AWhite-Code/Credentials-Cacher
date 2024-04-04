@@ -4,6 +4,7 @@ from PyQt5.QtSvg import QSvgWidget
 import pickle
 from Hashing import Hashing
 from Encryption import Encryption
+from ClickableLineEdit import ClickableLineEdit
 import os
 import json
 
@@ -64,7 +65,13 @@ class LoginWidget(QWidget):
         central_column_layout.addWidget(small_spacer)
 
         self.forgot_password_label = QLabel("Forgot my password", self)
+        self.forgot_password_label.setAlignment(Qt.AlignCenter)
+        # Make the text appear like a link
+        self.forgot_password_label.setStyleSheet("QLabel { color : blue; text-decoration: underline; }")
+        # Add to layout
         central_column_layout.addWidget(self.forgot_password_label)
+        # Connect the mouse press event
+        self.forgot_password_label.mousePressEvent = self.on_forgot_password_clicked
 
         # Wrapping central_column_layout in another QHBoxLayout to center it
         wrapper_layout = QHBoxLayout()
@@ -120,7 +127,7 @@ class LoginWidget(QWidget):
         """Reset the login form to its default state."""
         self.username_entry.clear()
         self.password_entry.clear()
-        self.remember_check.setChecked(False)
+        self.remember_me_checkbox.setChecked(False)
         
 
     def load_settings(self):
@@ -155,11 +162,16 @@ class LoginWidget(QWidget):
             
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        # Dynamically adjust the container size
-        container_width = self.size().width() * 0.3
-        container_height = self.size().height() * 0.4
-        self.logoContainer.setFixedSize(int(container_width), int(container_height))
+        # Ensure the dimensions are integers
+        logo_width = int(self.size().width() * 0.3)
+        logo_height = int(self.size().height() * 0.4)
+        self.logoContainer.setFixedSize(logo_width, logo_height)
 
-        field_width = max(200, self.size().width() * 0.5)
+        # Adjust the widths of QLineEdit widgets
+        field_width = max(200, int(self.size().width() * 0.5))
         for field in self.findChildren(QLineEdit):
-            field.setMaximumWidth(int(field_width))
+            field.setMaximumWidth(field_width)
+            
+    def on_forgot_password_clicked(self, event):
+        # Call the function to switch view to RegistrationWidget
+        self.on_show_other_frame()
