@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 import re
 import pickle
-from Hashing import Hashing  # Ensure you have this module or similar functionality
+from Hashing import Hashing
 
 class RegistrationWidget(QWidget):
     def __init__(self, main_window, parent=None):
@@ -17,57 +17,58 @@ class RegistrationWidget(QWidget):
         self.setLayout(QVBoxLayout())
         self.layout().setAlignment(Qt.AlignCenter)
 
-        # Main horizontal layout to split logo and form
-        main_horizontal_layout = QHBoxLayout()
+        # Main layout to organize logo and form
+        main_layout = QHBoxLayout()
 
-        # Logo setup with dark theme logic
-        logo_label = QLabel(self)
+        # Decide the logo based on the dark mode setting
         dark_mode = self.main_window.settings.get('dark_mode', False)
         logo_path = "Icons/logo_white.png" if dark_mode else "Icons/logo.png"
+        self.logo_label = QLabel(self)
         pixmap = QPixmap(logo_path)
-        logo_label.setPixmap(pixmap.scaled(320, 320, Qt.KeepAspectRatio))
-        main_horizontal_layout.addWidget(logo_label)
+        self.logo_label.setPixmap(pixmap.scaled(320, 320, Qt.KeepAspectRatio))
+        main_layout.addWidget(self.logo_label)
 
-        # Form elements setup
+        # Form elements
         form_layout = QVBoxLayout()
         form_layout.setAlignment(Qt.AlignCenter)
 
-        # Username with label above
-        username_label = QLabel("Username:")
-        form_layout.addWidget(username_label)
-        self.username_entry = QLineEdit(self)
-        self.username_entry.setPlaceholderText("Username...")
-        form_layout.addWidget(self.username_entry)
+        # Use spacers to push the form down and to the right
+        form_layout.addItem(QSpacerItem(20, 50, QSizePolicy.Minimum, QSizePolicy.Expanding))  # Adjust size for desired spacing
 
-        form_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Small spacer after username
+        # Adding labeled fields with spacers in between
+        self.add_labeled_field("Username:", "Username...", form_layout)
+        form_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Small spacer after username entry
 
-        # Password with label above
-        password_label = QLabel("Password:")
-        form_layout.addWidget(password_label)
-        self.password_entry = QLineEdit(self)
-        self.password_entry.setPlaceholderText("Password...")
-        self.password_entry.setEchoMode(QLineEdit.Password)
-        form_layout.addWidget(self.password_entry)
+        self.add_labeled_field("Password:", "Password...", form_layout, True)
+        form_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Small spacer after password entry
 
-        form_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Small spacer after password
-
-        # Confirm Password with label above
-        confirm_password_label = QLabel("Re-enter Password:")
-        form_layout.addWidget(confirm_password_label)
-        self.confirm_password_entry = QLineEdit(self)
-        self.confirm_password_entry.setPlaceholderText("Confirm Password...")
-        self.confirm_password_entry.setEchoMode(QLineEdit.Password)
-        form_layout.addWidget(self.confirm_password_entry)
-
-        form_layout.addItem(QSpacerItem(20, 30, QSizePolicy.Minimum, QSizePolicy.Expanding))  # Larger spacer before register button
+        self.add_labeled_field("Re-enter Password:", "Confirm Password...", form_layout, True)
+        form_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))  # Larger spacer before register button
 
         # Register button
         self.register_button = QPushButton("Register", self)
         form_layout.addWidget(self.register_button)
         self.register_button.clicked.connect(self.register_action)
 
-        main_horizontal_layout.addLayout(form_layout)
-        self.layout().addLayout(main_horizontal_layout)
+        # Wrap form layout in another layout to center it horizontally
+        form_wrapper_layout = QHBoxLayout()
+        form_wrapper_layout.addStretch(2)  # Increase stretch on the left to push everything more to the right
+        form_wrapper_layout.addLayout(form_layout)
+        form_wrapper_layout.addStretch(1)  # You can adjust this to manage the right-side spacing
+
+        main_layout.addLayout(form_wrapper_layout)
+        self.layout().addLayout(main_layout)
+
+    def add_labeled_field(self, label_text, placeholder, layout, is_password=False):
+        label = QLabel(label_text)
+        layout.addWidget(label)
+
+        field = QLineEdit(self)
+        field.setPlaceholderText(placeholder)
+        if is_password:
+            field.setEchoMode(QLineEdit.Password)
+        layout.addWidget(field)
+
 
     def register_action(self):
         username = self.username_entry.text()
@@ -102,3 +103,14 @@ class RegistrationWidget(QWidget):
         credentials = {'username': username, 'password': hashed_password}
         with open('credentials.bin', 'wb') as file:
             pickle.dump(credentials, file)
+            
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # Dynamically adjust the logo size based on the window size
+        width = self.size().width() * 0.25  # Calculate 25% of the parent width
+        height = self.size().height() * 0.25  # Calculate 25% of the parent height
+        self.logo_label.setPixmap(self.logo_label.pixmap().scaled(int(width), int(height), Qt.KeepAspectRatio))
+
+        # Dynamically adjust form field widths
+        for widget in self.findChildren(QLineEdit):
+            widget.setMaximumWidth(int(self.size().width() / 3))
