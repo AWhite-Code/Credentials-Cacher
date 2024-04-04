@@ -37,8 +37,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widgets)
 
         # Initialize widgets
-        self.login_widget = LoginWidget(self.toggle_widgets, self)
-        self.registration_widget = RegistrationWidget(self)
+        self.login_widget = LoginWidget(self.toggle_widgets, self, self.db)
+        self.registration_widget = RegistrationWidget(self.db, self)
 
         # Add widgets to the stack
         self.stacked_widgets.addWidget(self.registration_widget)
@@ -57,15 +57,19 @@ class MainWindow(QMainWindow):
             self.stacked_widgets.setCurrentWidget(self.login_widget)
 
     def check_credentials_exist(self):
-        # Check if the binary file exists and is not empty
-        if os.path.exists('credentials.bin'):
+        app_data_path = os.getenv('APPDATA')  # Get the AppData path
+        credentials_path = os.path.join(app_data_path, 'Credentials Cacher', 'credentials.bin')  # Path to the credentials file
+
+        # Check if the credentials file exists and is not empty
+        if os.path.exists(credentials_path):
             try:
-                with open('credentials.bin', 'rb') as file: # Try to load the credentials
+                with open(credentials_path, 'rb') as file:  # Open the file from its new location
                     credentials = pickle.load(file)
-                    return bool(credentials)                # Return True if credentials are not empty
-            except EOFError:                                # Empty file
+                    return bool(credentials)  # Return True if credentials are not empty
+            except EOFError:  # Handle empty file
                 return False
         return False
+
     
     def set_encryption_key(self, key):
         self.encryption_key = key
@@ -109,5 +113,10 @@ class MainWindow(QMainWindow):
             self.setAutoLockInterval(self.settings.get("auto_lock", 5))
         else:
             self.autoLockTimer.stop()
-        
+
+            
+    def show_login(self):
+        self.stacked_widgets.setCurrentWidget(self.login_widget)
+        self.login_widget.reset_state()
+            
         

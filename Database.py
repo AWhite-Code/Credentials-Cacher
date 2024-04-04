@@ -148,3 +148,9 @@ class Database:
             decrypted_entries.append((id, website_name, website_url, username, password, notes, bool(favourite), created_at, updated_at))
 
         return decrypted_entries
+    
+    def wipe_database(self):
+        cursor = self.connection.cursor()
+        # This deletes all entries in the vault
+        cursor.execute("DELETE FROM vault;")
+        self.connection.commit()

@@ -9,10 +9,11 @@ from Encryption import Encryption
 import os
 
 class LoginWidget(QWidget):
-    def __init__(self, on_show_other_frame, main_window, parent=None):
+    def __init__(self, on_show_other_frame, main_window, db, parent=None):
         super(LoginWidget, self).__init__(parent)
         self.on_show_other_frame = on_show_other_frame
         self.main_window = main_window 
+        self.db = db
         self.init_ui()
 
     def init_ui(self):
@@ -104,8 +105,11 @@ class LoginWidget(QWidget):
             QMessageBox.warning(self, "Login Failed", "The username or password is incorrect.")
 
     def validate_login(self, username, password):
+        app_data_path = os.getenv('APPDATA')  # Get the AppData path
+        credentials_path = os.path.join(app_data_path, 'Credentials Cacher', 'credentials.bin')  # Path to the credentials file
+
         try:
-            with open('credentials.bin', 'rb') as file:
+            with open(credentials_path, 'rb') as file:
                 credentials = pickle.load(file)
                 if credentials['username'] == username:
                     return Hashing.verify_password(credentials['password'], password)
