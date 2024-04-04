@@ -79,6 +79,7 @@ class OptionsDialog(QDialog):
                 "darkMode": False,
                 "passwordVisibility": False,
                 "autoLockTimer": 300,  # Example: 300 seconds
+                "rememberpassword": False,
                 "passwordGenerator": {
                     "length": 12,
                     "includeUppercase": True,
