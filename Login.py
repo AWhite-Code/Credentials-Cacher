@@ -7,6 +7,7 @@ import pickle
 from Hashing import Hashing
 from Encryption import Encryption
 import os
+import json
 
 class LoginWidget(QWidget):
     def __init__(self, on_show_other_frame, main_window, db, parent=None):
@@ -56,8 +57,8 @@ class LoginWidget(QWidget):
         central_column_layout.addWidget(self.password_entry)
 
         # Remember Username Checkbox
-        self.remember_check = QCheckBox("Remember Username", self)
-        central_column_layout.addWidget(self.remember_check)
+        self.remember_me_checkbox = QCheckBox("Remember Me", self)
+        central_column_layout.addWidget(self.remember_me_checkbox)
 
         # Spacer to add some distance between the "Remember Username" checkbox and the "Login" button
         medium_spacer = QWidget()
@@ -89,6 +90,8 @@ class LoginWidget(QWidget):
 
         # Add the grid layout to the main layout
         main_layout.addLayout(grid_layout)
+        
+        self.load_settings()
 
     def forgot_password(self, event):
         self.on_show_other_frame()
@@ -96,11 +99,13 @@ class LoginWidget(QWidget):
     def login_action(self):
         username = self.username_entry.text()
         password = self.password_entry.text()
+
         if self.validate_login(username, password):
             global_salt = self.get_global_salt()
             encryption_key = Encryption.derive_key(password.encode(), global_salt)
-            self.main_window.set_encryption_key(encryption_key)                
+            self.main_window.set_encryption_key(encryption_key)
             self.main_window.stacked_widgets.setCurrentWidget(self.main_window.vault_widget)
+            self.save_settings()
         else:
             QMessageBox.warning(self, "Login Failed", "The username or password is incorrect.")
 
@@ -133,3 +138,35 @@ class LoginWidget(QWidget):
         self.username_entry.clear()
         self.password_entry.clear()
         self.remember_check.setChecked(False)
+        
+    def load_settings(self):
+        credentials_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'credentials.bin')
+        try:
+            with open(credentials_path, 'rb') as file:
+                credentials = pickle.load(file)
+                # Check if the 'remember_me' setting is true in settings.json
+                settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
+                with open(settings_path, 'r') as settings_file:
+                    settings = json.load(settings_file)
+                    if settings.get('remember_me', False):
+                        # If remember_me is true, set the username from credentials.bin
+                        self.username_entry.setText(credentials['username'])
+                        self.remember_me_checkbox.setChecked(True)
+        except FileNotFoundError:
+            pass  # Handle the case where the credentials file doesn't exist
+        except Exception as e:
+            print(f"An error occurred while loading settings: {e}")
+
+            
+    def save_settings(self):
+        settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
+        try:
+            with open(settings_path, 'r') as file:
+                settings = json.load(file)
+        except FileNotFoundError:
+            settings = {}
+
+        settings['remember_me'] = self.remember_me_checkbox.isChecked()
+
+        with open(settings_path, 'w') as file:
+            json.dump(settings, file, indent=4)
