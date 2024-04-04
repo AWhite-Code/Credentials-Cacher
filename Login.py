@@ -1,8 +1,6 @@
-from PyQt5.QtWidgets import (
-    QWidget, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
-)
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QLineEdit, QPushButton, QCheckBox, QFrame, QMessageBox
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtSvg import QSvgWidget
 import pickle
 from Hashing import Hashing
 from Encryption import Encryption
@@ -13,7 +11,7 @@ class LoginWidget(QWidget):
     def __init__(self, on_show_other_frame, main_window, db, parent=None):
         super(LoginWidget, self).__init__(parent)
         self.on_show_other_frame = on_show_other_frame
-        self.main_window = main_window 
+        self.main_window = main_window
         self.db = db
         self.init_ui()
 
@@ -21,78 +19,63 @@ class LoginWidget(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setAlignment(Qt.AlignCenter)
 
-        # Assuming self.main_window.settings is a way to access settings
-        # Replace this with your actual method of accessing settings
         dark_mode_enabled = self.main_window.settings.get('dark_mode', False)
-        logo_path = "Icons/logo.png" if not dark_mode_enabled else "Icons/logo_white.png"
+        logo_path = "Icons/logo.svg" if not dark_mode_enabled else "Icons/logo_white.svg"
 
-        # Logo
-        logo_label = QLabel(self)
-        pixmap = QPixmap(logo_path)
-        logo_label.setPixmap(pixmap)
-        logo_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(logo_label)
-
-        # Grid layout to act as the 3x3 grid you described
-        grid_layout = QHBoxLayout()
-        grid_layout.setAlignment(Qt.AlignCenter)
-
-        # Left spacer
-        left_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        grid_layout.addItem(left_spacer)
-
-        # Central column for form elements
         central_column_layout = QVBoxLayout()
         central_column_layout.setAlignment(Qt.AlignCenter)
 
-        # Username Entry
+        # Create a new QHBoxLayout for the logo and its spacer
+        logo_layout = QHBoxLayout()
+        logo_layout.setAlignment(Qt.AlignCenter)
+
+        # Spacer to push the logo to the right
+        left_spacer_for_logo = QSpacerItem(5, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        logo_layout.addItem(left_spacer_for_logo)  # Add the spacer to the layout
+
+        # Using QSvgWidget for SVG logo handling
+        self.logoContainer = QSvgWidget(logo_path, self)
+        logo_layout.addWidget(self.logoContainer)  # Add the logo to the layout
+
+        central_column_layout.addLayout(logo_layout)  # Add the logo layout to the central column
+
         self.username_entry = QLineEdit(self)
         self.username_entry.setPlaceholderText("Username...")
         central_column_layout.addWidget(self.username_entry)
 
-        # Password Entry
         self.password_entry = QLineEdit(self)
         self.password_entry.setPlaceholderText("Password...")
         self.password_entry.setEchoMode(QLineEdit.Password)
         central_column_layout.addWidget(self.password_entry)
 
-        # Remember Username Checkbox
         self.remember_me_checkbox = QCheckBox("Remember Me", self)
         central_column_layout.addWidget(self.remember_me_checkbox)
 
-        # Spacer to add some distance between the "Remember Username" checkbox and the "Login" button
         medium_spacer = QWidget()
-        medium_spacer.setFixedHeight(20)  # Adjust the height as needed for appropriate spacing
+        medium_spacer.setFixedHeight(20)
         central_column_layout.addWidget(medium_spacer)
 
-        # Login Button
         self.login_button = QPushButton("Login", self)
         central_column_layout.addWidget(self.login_button)
         self.login_button.clicked.connect(self.login_action)
 
-        # Spacer to add some distance between the login button and the forgot password label
         small_spacer = QWidget()
-        small_spacer.setFixedHeight(10)  # Adjust the height as needed
+        small_spacer.setFixedHeight(10)
         central_column_layout.addWidget(small_spacer)
 
-        # Forgot my password Label
         self.forgot_password_label = QLabel("Forgot my password", self)
-        self.forgot_password_label.setAlignment(Qt.AlignCenter)
-        self.forgot_password_label.mousePressEvent = self.forgot_password
         central_column_layout.addWidget(self.forgot_password_label)
 
-        # Add the central column to the grid layout
-        grid_layout.addLayout(central_column_layout)
+        # Wrapping central_column_layout in another QHBoxLayout to center it
+        wrapper_layout = QHBoxLayout()
+        wrapper_layout.addStretch()  # This adds a flexible space before central_column_layout that expands
+        wrapper_layout.addLayout(central_column_layout)  # Add central_column_layout which we want to center
+        wrapper_layout.addStretch()  # This adds a flexible space after central_column_layout that expands
 
-        # Right spacer
-        right_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        grid_layout.addItem(right_spacer)
+        main_layout.addLayout(wrapper_layout)
 
-        # Add the grid layout to the main layout
-        main_layout.addLayout(grid_layout)
-        
         self.load_settings()
-
+        
     def forgot_password(self, event):
         self.on_show_other_frame()
 
@@ -139,26 +122,25 @@ class LoginWidget(QWidget):
         self.password_entry.clear()
         self.remember_check.setChecked(False)
         
+
     def load_settings(self):
-        credentials_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'credentials.bin')
+        settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
         try:
-            with open(credentials_path, 'rb') as file:
-                credentials = pickle.load(file)
-                # Check if the 'remember_me' setting is true in settings.json
-                settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
-                with open(settings_path, 'r') as settings_file:
-                    settings = json.load(settings_file)
-                    if settings.get('remember_me', False):
-                        # If remember_me is true, set the username from credentials.bin
+            with open(settings_path, 'r') as file:
+                settings = json.load(file)
+                if settings.get('remember_me', False):
+                    self.remember_me_checkbox.setChecked(True)
+                    # Load username from credentials.bin
+                    credentials_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'credentials.bin')
+                    with open(credentials_path, 'rb') as cred_file:
+                        credentials = pickle.load(cred_file)
                         self.username_entry.setText(credentials['username'])
-                        self.remember_me_checkbox.setChecked(True)
         except FileNotFoundError:
-            pass  # Handle the case where the credentials file doesn't exist
-        except Exception as e:
-            print(f"An error occurred while loading settings: {e}")
+            pass
 
             
     def save_settings(self):
+        # Method to save 'remember_me' setting without storing username
         settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
         try:
             with open(settings_path, 'r') as file:
@@ -170,3 +152,14 @@ class LoginWidget(QWidget):
 
         with open(settings_path, 'w') as file:
             json.dump(settings, file, indent=4)
+            
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # Dynamically adjust the container size
+        container_width = self.size().width() * 0.3
+        container_height = self.size().height() * 0.4
+        self.logoContainer.setFixedSize(int(container_width), int(container_height))
+
+        field_width = max(200, self.size().width() * 0.5)
+        for field in self.findChildren(QLineEdit):
+            field.setMaximumWidth(int(field_width))
