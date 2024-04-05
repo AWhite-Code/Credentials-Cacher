@@ -293,11 +293,11 @@ class VaultWidget(QWidget):
         self.addPasswordFormWidget = QWidget()  # Create the container widget for the form
         verticalLayout = QVBoxLayout(self.addPasswordFormWidget)  # Arrange form elements vertically
 
-        # Add a spacer to create vertical space at the beginning of the form
-        spacer = QSpacerItem(20, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
-        verticalLayout.addSpacerItem(spacer)
-
         formLayout = QFormLayout()  # Organize form fields and labels in a two-column layout
+        formLayout.setRowWrapPolicy(QFormLayout.DontWrapRows)
+        formLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        formLayout.setVerticalSpacing(10)  # Set vertical spacing between form rows
+
         # Initialize and add input fields and labels to the form
         self.website_name_entry = QLineEdit()
         self.website_url_entry = QLineEdit()
@@ -317,6 +317,10 @@ class VaultWidget(QWidget):
 
         verticalLayout.addLayout(formLayout)  # Add the form layout to the vertical layout
         self.stackedWidget.addWidget(self.addPasswordFormWidget)  # Add the form widget to the stacked widget
+
+        # Remove any additional spacing or margins that may push the form down
+        verticalLayout.setSpacing(5)  # Adjust this value to control space between elements
+        verticalLayout.setContentsMargins(10, 10, 10, 10)  # Adjust margins around the form
 
     def toggle_add_password_form(self):
         """
