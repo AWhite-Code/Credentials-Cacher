@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 import json
-from utils import get_settings_path
+from core.utils import get_settings_path
 
 class ThemeManager(QObject):
     themeChanged = pyqtSignal(str)  # Signal emitting the new theme name

@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QStackedWidget
 from PyQt5.QtCore import QTimer
-from Login import LoginWidget
-from Vault_Window import VaultWidget
-from Registration import RegistrationWidget
+from .Login import LoginWidget
+from .Vault_Window import VaultWidget
+from .Registration import RegistrationWidget
 import os
 import pickle
 

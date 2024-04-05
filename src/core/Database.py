@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from Encryption import Encryption
+from .Encryption import Encryption
 
 class Database:
     def __init__(self):

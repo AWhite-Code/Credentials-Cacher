@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
-from Window import MainWindow
-from Database import Database
-from Thememanager import ThemeManager
-from Options import OptionsDialog
+from ui.Window import MainWindow
+from core.Database import Database
+from ui.Thememanager import ThemeManager
+from ui.Options import OptionsDialog
 import logging
 import sys
 import os

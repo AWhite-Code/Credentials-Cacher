@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSiz
 from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
 import pickle
-from Hashing import Hashing
-from Encryption import Encryption
+from core.Hashing import Hashing
+from core.Encryption import Encryption
 import os
 import json
 
@@ -20,7 +20,13 @@ class LoginWidget(QWidget):
         main_layout.setAlignment(Qt.AlignCenter)
 
         dark_mode_enabled = self.main_window.settings.get('dark_mode', False)
-        logo_path = "Icons/logo.svg" if not dark_mode_enabled else "Icons/logo_white.svg"
+        
+        # Construct the path to the SVG file
+        base_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory where the script is located
+        resources_dir = os.path.join(os.path.dirname(os.path.dirname(base_dir)), 'resources', 'icons')  # Navigate up to the root and then to /resources/icons
+        
+        logo_filename = "logo_white.svg" if not dark_mode_enabled else "logo.svg"
+        logo_path = os.path.join(resources_dir, logo_filename)
 
         central_column_layout = QVBoxLayout()
         central_column_layout.setAlignment(Qt.AlignCenter)
