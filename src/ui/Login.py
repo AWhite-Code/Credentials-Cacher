@@ -8,92 +8,154 @@ import os
 import json
 
 class LoginWidget(QWidget):
+    """
+    Widget for user login, including fields for username and password, a 'Remember Me' checkbox, 
+    and a login button. Displays the logo and adapts to dark mode settings.
+    
+    Attributes:
+        on_show_other_frame (Callable): Function to trigger the display of a different UI frame.
+        main_window (MainWindow): The main application window instance for accessing global settings.
+        db (Database): Database connection object, not used in this part but required for complete functionality.
+    """
+
     def __init__(self, on_show_other_frame, main_window, db, parent=None):
-        super(LoginWidget, self).__init__(parent)
+        """
+        Initializes the login widget with callback functions and main window reference.
+        
+        Args:
+            on_show_other_frame (Callable): Function to switch to another part of the application UI.
+            main_window (MainWindow): Reference to the main application window.
+            db (Database): The application's database connection. Not directly used in this widget.
+            parent (QWidget, optional): Parent widget. Defaults to None.
+        """
+        super().__init__(parent)
         self.on_show_other_frame = on_show_other_frame
         self.main_window = main_window
         self.db = db
         self.init_ui()
 
     def init_ui(self):
+        """
+        Initializes UI components for the login interface, arranging them in a vertical layout.
+        """
         main_layout = QVBoxLayout(self)
         main_layout.setAlignment(Qt.AlignCenter)
 
         dark_mode_enabled = self.main_window.settings.get('dark_mode', False)
-        
-        # Construct the path to the SVG file
-        base_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory where the script is located
-        resources_dir = os.path.join(os.path.dirname(os.path.dirname(base_dir)), 'resources', 'icons')  # Navigate up to the root and then to /resources/icons
-        
-        logo_filename = "logo.svg" if not dark_mode_enabled else "logo_white.svg"
-        logo_path = os.path.join(resources_dir, logo_filename)
+        logo_path = self.determine_logo_path(dark_mode_enabled)
 
         central_column_layout = QVBoxLayout()
         central_column_layout.setAlignment(Qt.AlignCenter)
+        self.setup_logo(central_column_layout, logo_path)
+        self.setup_form_fields(central_column_layout)
+        self.setup_action_buttons(central_column_layout)
 
-        # Create a new QHBoxLayout for the logo and its spacer
-        logo_layout = QHBoxLayout()
-        logo_layout.setAlignment(Qt.AlignCenter)
+        main_layout.addLayout(central_column_layout)
+        self.load_settings()
 
-        # Spacer to push the logo to the right
-        left_spacer_for_logo = QSpacerItem(5, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        logo_layout.addItem(left_spacer_for_logo)  # Add the spacer to the layout
+    def determine_logo_path(self, dark_mode_enabled):
+        """
+        Computes the file path for the logo, choosing between the standard and dark mode variants.
+        
+        Args:
+            dark_mode_enabled (bool): Indicates whether dark mode is currently enabled.
+        
+        Returns:
+            str: Path to the logo file suitable for the current mode.
+        """
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        resources_dir = os.path.join(os.path.dirname(os.path.dirname(base_dir)), 'resources', 'icons')
+        logo_filename = "logo_white.svg" if dark_mode_enabled else "logo.svg"
+        return os.path.join(resources_dir, logo_filename)
 
-        # Using QSvgWidget for SVG logo handling
-        self.logoContainer = QSvgWidget(logo_path, self)
-        logo_layout.addWidget(self.logoContainer)  # Add the logo to the layout
+    def setup_logo(self, layout, logo_path):
+        """
+        Configures and places the application logo within the given layout.
+        
+        Args:
+            layout (QVBoxLayout): The layout to which the logo will be added.
+            logo_path (str): The path to the logo file.
+        """
+        logo_widget = QSvgWidget(logo_path, self)
+        layout.addWidget(logo_widget, alignment=Qt.AlignCenter)
 
-        central_column_layout.addLayout(logo_layout)  # Add the logo layout to the central column
-
+    def setup_form_fields(self, layout):
+        """
+        Arranges username and password input fields within the specified layout.
+        
+        Args:
+            layout (QVBoxLayout): The layout for placing the input fields.
+        """
         self.username_entry = QLineEdit(self)
         self.username_entry.setPlaceholderText("Username...")
-        central_column_layout.addWidget(self.username_entry)
+        layout.addWidget(self.username_entry)
 
         self.password_entry = QLineEdit(self)
         self.password_entry.setPlaceholderText("Password...")
         self.password_entry.setEchoMode(QLineEdit.Password)
-        central_column_layout.addWidget(self.password_entry)
+        layout.addWidget(self.password_entry)
 
         self.remember_me_checkbox = QCheckBox("Remember Me", self)
-        central_column_layout.addWidget(self.remember_me_checkbox)
+        layout.addWidget(self.remember_me_checkbox)
 
-        medium_spacer = QWidget()
-        medium_spacer.setFixedHeight(20)
-        central_column_layout.addWidget(medium_spacer)
-
+    def setup_action_buttons(self, layout):
+        """
+        Adds login and forgot password buttons to the layout, with appropriate spacing.
+        
+        Args:
+            layout (QVBoxLayout): The layout to contain the buttons.
+        """
         self.login_button = QPushButton("Login", self)
-        central_column_layout.addWidget(self.login_button)
         self.login_button.clicked.connect(self.login_action)
+        layout.addWidget(self.login_button)
 
-        small_spacer = QWidget()
-        small_spacer.setFixedHeight(10)
-        central_column_layout.addWidget(small_spacer)
+        forgot_password_label = QLabel("<a href='#'>Forgot my password</a>", self)
+        forgot_password_label.setAlignment(Qt.AlignCenter)
+        forgot_password_label.mousePressEvent = self.on_forgot_password_clicked
+        layout.addWidget(forgot_password_label)
 
+    def setup_forgot_password_label(self, layout):
+        """
+        Configures the "Forgot my password" label as a clickable link.
+
+        Args:
+            layout (QVBoxLayout): The layout where the label is to be added.
+        """
         self.forgot_password_label = QLabel("Forgot my password", self)
         self.forgot_password_label.setAlignment(Qt.AlignCenter)
-        # Make the text appear like a link
-        self.forgot_password_label.setStyleSheet("QLabel { color : blue; text-decoration: underline; }")
-        # Add to layout
-        central_column_layout.addWidget(self.forgot_password_label)
-        # Connect the mouse press event
+        self.forgot_password_label.setStyleSheet("color: blue; text-decoration: underline;")
         self.forgot_password_label.mousePressEvent = self.on_forgot_password_clicked
+        layout.addWidget(self.forgot_password_label)
 
-        # Wrapping central_column_layout in another QHBoxLayout to center it
+    def wrap_central_layout(self, main_layout, central_column_layout):
+        """
+        Centers the central column layout within the main layout by adding horizontal stretches.
+
+        Args:
+            main_layout (QVBoxLayout): The main layout of the widget.
+            central_column_layout (QVBoxLayout): The layout containing form elements.
+        """
         wrapper_layout = QHBoxLayout()
-        wrapper_layout.addStretch()  # This adds a flexible space before central_column_layout that expands
-        wrapper_layout.addLayout(central_column_layout)  # Add central_column_layout which we want to center
-        wrapper_layout.addStretch()  # This adds a flexible space after central_column_layout that expands
-
+        wrapper_layout.addStretch()
+        wrapper_layout.addLayout(central_column_layout)
+        wrapper_layout.addStretch()
         main_layout.addLayout(wrapper_layout)
 
-        self.load_settings()
-        
     def forgot_password(self, event):
+        """
+        Triggered when the "Forgot my password" label is clicked. Calls the function to switch views.
+
+        Args:
+            event: The mouse event.
+        """
         self.on_show_other_frame()
 
     def login_action(self):
-        username = self.username_entry.text()
-        password = self.password_entry.text()
+        """
+        Validates the username and password against stored credentials. If successful, proceeds to the main application view.
+        """
+        username = self.username_entry.text().strip()
+        password = self.password_entry.text().strip()
 
         if self.validate_login(username, password):
             global_salt = self.get_global_salt()
@@ -105,22 +167,38 @@ class LoginWidget(QWidget):
             QMessageBox.warning(self, "Login Failed", "The username or password is incorrect.")
 
     def validate_login(self, username, password):
-        app_data_path = os.getenv('APPDATA')  # Get the AppData path
-        credentials_path = os.path.join(app_data_path, 'Credentials Cacher', 'credentials.bin')  # Path to the credentials file
+        """
+        Checks the provided username and password against the stored credentials.
+
+        Args:
+            username (str): The entered username.
+            password (str): The entered password.
+
+        Returns:
+            bool: True if the credentials match, False otherwise.
+        """
+        credentials_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'credentials.bin')
 
         try:
             with open(credentials_path, 'rb') as file:
                 credentials = pickle.load(file)
-                if credentials['username'] == username:
-                    return Hashing.verify_password(credentials['password'], password)
+                return Hashing.verify_password(credentials['password'], password) and credentials['username'] == username
         except FileNotFoundError:
             QMessageBox.critical(self, "Error", "Credentials file not found.")
+            return False
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
-        return False
+            return False
 
     def get_global_salt(self):
+        """
+        Retrieves the global salt used for encryption from the stored file.
+
+        Returns:
+            bytes: The global salt, or None if the file could not be found.
+        """
         salt_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'global_salt.bin')
+
         try:
             with open(salt_path, 'rb') as salt_file:
                 return salt_file.read()
@@ -129,54 +207,56 @@ class LoginWidget(QWidget):
             return None
 
     def reset_state(self):
-        """Reset the login form to its default state."""
+        """
+        Resets the input fields and checkboxes to their default state.
+        """
         self.username_entry.clear()
         self.password_entry.clear()
         self.remember_me_checkbox.setChecked(False)
-        
 
     def load_settings(self):
+        """
+        Loads user preferences from the settings file, applying any remembered username.
+        """
         settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
+
         try:
             with open(settings_path, 'r') as file:
                 settings = json.load(file)
                 if settings.get('remember_me', False):
-                    self.remember_me_checkbox.setChecked(True)
-                    # Load username from credentials.bin
-                    credentials_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'credentials.bin')
+                    credentials_path = os.path.join(settings_path, '..', 'credentials.bin')
                     with open(credentials_path, 'rb') as cred_file:
                         credentials = pickle.load(cred_file)
                         self.username_entry.setText(credentials['username'])
         except FileNotFoundError:
-            pass
+            pass  # Settings file doesn't exist; proceed with defaults.
+        except json.JSONDecodeError:
+            print("Error reading settings file. It may be empty or corrupted.")
 
-            
     def save_settings(self):
-        # Method to save 'remember_me' setting without storing username
+        """
+        Saves the 'remember_me' preference to the settings file.
+        """
         settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
         try:
-            with open(settings_path, 'r') as file:
-                settings = json.load(file)
-        except FileNotFoundError:
-            settings = {}
+            settings = {'remember_me': self.remember_me_checkbox.isChecked()}
+            with open(settings_path, 'w') as file:
+                json.dump(settings, file, indent=4)
+        except Exception as e:
+            print(f"Error saving settings: {e}")
 
-        settings['remember_me'] = self.remember_me_checkbox.isChecked()
-
-        with open(settings_path, 'w') as file:
-            json.dump(settings, file, indent=4)
-            
     def resizeEvent(self, event):
-        super().resizeEvent(event)
-        # Ensure the dimensions are integers
-        logo_width = int(self.size().width() * 0.3)
-        logo_height = int(self.size().height() * 0.4)
-        self.logoContainer.setFixedSize(logo_width, logo_height)
-
-        # Adjust the widths of QLineEdit widgets
-        field_width = max(200, int(self.size().width() * 0.5))
+        """
+        Adjusts UI elements dynamically based on the widget's size changes.
+        """
+        if hasattr(self, 'logoContainer'):
+            self.logoContainer.setFixedSize(int(self.size().width() * 0.3), int(self.size().height() * 0.4))
         for field in self.findChildren(QLineEdit):
-            field.setMaximumWidth(field_width)
-            
+            field.setMaximumWidth(max(200, int(self.size().width() * 0.5)))
+
     def on_forgot_password_clicked(self, event):
-        # Call the function to switch view to RegistrationWidget
+        """
+        Handles clicks on the "Forgot my password" label, warning about vault wipe.
+        """
         self.on_show_other_frame()
+        QMessageBox.warning(self, "WARNING!", "Warning: Resetting your password will wipe your password vault clean as a security measure.")

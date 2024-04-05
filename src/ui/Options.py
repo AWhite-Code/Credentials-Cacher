@@ -95,22 +95,48 @@ class OptionsDialog(QDialog):
         """
         settings_path = get_settings_path()
         if not os.path.exists(settings_path):
-            default_settings = { ... }  # Define default settings dictionary
+            # Define a dictionary with default settings values
+            default_settings = {
+                "dark_mode": False,  # Default to light theme
+                "show_passwords": False,  # Default to hiding passwords
+                "auto_lock_enabled": False,  # Default to auto-lock disabled
+                "auto_lock": 5,  # Default auto-lock time (in minutes)
+                "remember_me": False,
+            }
+            # Save the default settings to a new file
             with open(settings_path, 'w') as file:
                 json.dump(default_settings, file, indent=4)
             return default_settings
         else:
-            with open(settings_path, 'r') as file:
-                return json.load(file)
+            try:
+                # If the settings file exists, attempt to load and return its contents
+                with open(settings_path, 'r') as file:
+                    return json.load(file)
+            except json.JSONDecodeError:
+                # Handle empty or corrupted settings file by returning default settings
+                print("Error reading the settings file. It might be empty or corrupted.")
+                return {
+                    "dark_mode": False,
+                    "show_passwords": False,
+                    "auto_lock_enabled": False,
+                    "auto_lock": 5,
+                    # Add any other default settings you need
+                }
 
     def accept(self):
-        """
-        Overrides QDialog.accept to save settings and apply theme changes before closing the dialog.
-        """
         settings_path = get_settings_path()
-        settings = { ... }  # Gather settings from UI components
+        settings = {
+            'dark_mode': self.darkModeToggle.isChecked(),
+            'show_passwords': self.passwordVisibilityToggle.isChecked(),
+            'auto_lock_enabled': self.autoLockEnabledCheckbox.isChecked(),
+            'auto_lock': self.autoLockSlider.value() * 5,  # Assuming you want to store this as minutes
+            # Add any other settings you need to save here
+        }
         with open(settings_path, 'w') as file:
             json.dump(settings, file, indent=4)
-        self.themeManager.setTheme("dark" if settings['dark_mode'] else "light")
+
+        newTheme = "dark" if settings['dark_mode'] else "light"
+        self.themeManager.setTheme(newTheme)
         self.parent().applyGlobalSettings() 
+
         super().accept()

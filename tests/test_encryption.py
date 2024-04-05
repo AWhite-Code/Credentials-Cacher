@@ -1,5 +1,5 @@
 import pytest
-from Encryption import Encryption
+from ..src.core.Encryption import Encryption
 from Crypto.Random import get_random_bytes
 
 def test_encryption():

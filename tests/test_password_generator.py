@@ -1,4 +1,4 @@
-from Password_Generator import PasswordGenerator  # Adjust the import according to your project structure
+from ..src.core.Password_Generator import PasswordGenerator  # Adjust the import according to your project structure
 import pytest
 
 class TestPasswordGenerator:
@@ -30,5 +30,5 @@ class TestPasswordGenerator:
 
     def test_randomness(self):
         """Test that multiple invocations produce different passwords."""
-        passwords = {PasswordGenerator.generate_password() for _ in range(10)}
+        passwords = {PasswordGenerator.generate_password() for _ in range(100)}
         assert len(passwords) > 1, "Generated passwords are not unique"
