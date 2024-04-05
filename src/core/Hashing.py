@@ -4,8 +4,21 @@ from Crypto.Random import get_random_bytes
 import base64
 
 class Hashing:
+    """
+    Provides functionality for hashing and verifying passwords securely.
+    """
+    
     @staticmethod
     def hash_password(password):
+        """
+        Hashes a password using PBKDF2-SHA256, generating a random salt for each new hash.
+
+        Args:
+            password (str): The password to be hashed.
+
+        Returns:
+            str: The hashed password in a storage format that includes the salt and the hash, separated by "::".
+        """
         # Generate a random salt
         salt = get_random_bytes(16)
         # Hash the password with the salt using PBKDF2-SHA256
@@ -16,6 +29,16 @@ class Hashing:
 
     @staticmethod
     def verify_password(stored_password, provided_password):
+        """
+        Verifies a provided password against a stored password hash.
+
+        Args:
+            stored_password (str): The hashed password stored in the format "salt::hash".
+            provided_password (str): The password provided for verification.
+
+        Returns:
+            bool: True if the provided password matches the stored hash, False otherwise.
+        """
         # Extract the salt and key from the stored password format
         salt_encoded, key_encoded = stored_password.split("::")
         salt = base64.b64decode(salt_encoded)

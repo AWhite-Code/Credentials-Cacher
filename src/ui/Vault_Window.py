@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
 from .Password_Entry import PasswordEntryButton
-from .Password_Generator import PasswordGenerator
+from core.Password_Generator import PasswordGenerator
 import json
 from core.utils import get_settings_path
 from .Options import OptionsDialog

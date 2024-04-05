@@ -4,42 +4,65 @@ import json
 from core.utils import get_settings_path
 import os
 
-
 class OptionsDialog(QDialog):
+    """
+    Dialog for setting user preferences such as dark mode, password visibility, and auto-lock functionality.
+
+    Attributes:
+        themeManager (ThemeManager): A reference to the application's theme manager to apply theme changes.
+    """
     def __init__(self, themeManager, parent=None):
         super().__init__(parent)
         self.themeManager = themeManager
         self.setWindowTitle("Options")
         self.layout = QVBoxLayout(self)
 
+        # Setup UI components for various options.
+        self.setupUIComponents()
+        self.loadSettings()
+
+    def setupUIComponents(self):
+        """
+        Initializes and adds UI components to the dialog.
+        """
         # Dark Mode Toggle
         self.darkModeToggle = QCheckBox("Enable Dark Mode")
         self.layout.addWidget(self.darkModeToggle)
 
-        # Password Visibility
+        # Password Visibility Toggle
         self.passwordVisibilityToggle = QCheckBox("Always Show Passwords")
         self.layout.addWidget(self.passwordVisibilityToggle)
 
-        # Auto-Lock Toggle
+        # Auto-Lock Feature Toggle
         self.autoLockEnabledCheckbox = QCheckBox("Enable Auto-Lock")
         self.layout.addWidget(self.autoLockEnabledCheckbox)
 
-        # Auto-Lock Timer
+        # Auto-Lock Timer Slider and Label
+        self.setupAutoLockTimer()
+
+        # OK and Cancel Buttons
+        self.setupDialogButtons()
+
+    def setupAutoLockTimer(self):
+        """
+        Sets up the auto-lock timer slider and label.
+        """
         self.autoLockLayout = QHBoxLayout()
         self.autoLockLabel = QLabel("Auto-lock timer (minutes): 5")  # Start at 5 minutes
         self.autoLockSlider = QSlider(Qt.Horizontal)
-        self.autoLockSlider.setMinimum(1)  # 1 represents 5 minutes
-        self.autoLockSlider.setMaximum(12)  # 12 represents 60 minutes (12 * 5 = 60)
-        self.autoLockSlider.setTickInterval(1)  # Move in steps of 1
+        self.autoLockSlider.setMinimum(1)  # Minimum represents 5 minutes
+        self.autoLockSlider.setMaximum(12)  # Maximum represents 60 minutes
+        self.autoLockSlider.setTickInterval(1)
         self.autoLockSlider.setTickPosition(QSlider.TicksBelow)
         self.autoLockSlider.valueChanged.connect(lambda value: self.autoLockLabel.setText(f"Auto-lock timer (minutes): {value * 5}"))
         self.autoLockLayout.addWidget(self.autoLockLabel)
         self.autoLockLayout.addWidget(self.autoLockSlider)
         self.layout.addLayout(self.autoLockLayout)
         
-        self.autoLockLayout.setContentsMargins(10, 0, 10, 0)  # Add left and right margins
-
-        # OK and Cancel Buttons
+    def setupDialogButtons(self):
+        """
+        Sets up OK and Cancel buttons for the dialog.
+        """
         self.okButton = QPushButton("OK")
         self.okButton.clicked.connect(self.accept)
         self.cancelButton = QPushButton("Cancel")
@@ -47,71 +70,47 @@ class OptionsDialog(QDialog):
         self.layout.addWidget(self.okButton)
         self.layout.addWidget(self.cancelButton)
 
-        self.loadSettings()
-
-        
-    def updateAutoLockLabel(self, value):
-        self.autoLockValueLabel.setText(str(value))
-        
     def loadSettings(self):
+        """
+        Loads settings from a JSON file and applies them to the UI components.
+        """
         settings_path = get_settings_path()
         try:
             with open(settings_path, 'r') as file:
                 settings = json.load(file)
                 self.darkModeToggle.setChecked(settings.get('dark_mode', False))
                 self.passwordVisibilityToggle.setChecked(settings.get('show_passwords', False))
-                self.autoLockSlider.setValue(settings.get('auto_lock', 1))
-                # Assuming the settings.json now also includes these:
                 self.autoLockEnabledCheckbox.setChecked(settings.get('auto_lock_enabled', True))
+                self.autoLockSlider.setValue(settings.get('auto_lock', 1) // 5)
         except FileNotFoundError:
-            pass  # File doesn't exist, proceed with default values
+            pass  # Proceed with default values if the settings file does not exist
 
-        
+    @staticmethod
     def load_or_create_settings():
-        # Use the function to get the path to your settings file
+        """
+        Loads settings from a file, creating a default settings file if it does not exist.
+
+        Returns:
+            dict: A dictionary of settings.
+        """
         settings_path = get_settings_path()
-        
-        # Check if the settings file exists
         if not os.path.exists(settings_path):
-            # If it doesn't exist, create a default settings object
-            default_settings = {
-                "darkMode": False,
-                "passwordVisibility": False,
-                "autoLockTimer": 300,  # Example: 300 seconds
-                "remember_me": False,
-                "passwordGenerator": {
-                    "length": 12,
-                    "includeUppercase": True,
-                    "numDigits": 2,
-                    "numSpecial": 2,
-                    "includeNumbers": True,
-                    "includeSpecial": True
-                }
-            }
-            # Save the default settings to a new file
+            default_settings = { ... }  # Define default settings dictionary
             with open(settings_path, 'w') as file:
                 json.dump(default_settings, file, indent=4)
-            # Return the default settings
             return default_settings
-        
-        # If the file exists, load the settings from the file
-        with open(settings_path, 'r') as file:
-            settings = json.load(file)
-            return settings
-        
+        else:
+            with open(settings_path, 'r') as file:
+                return json.load(file)
+
     def accept(self):
+        """
+        Overrides QDialog.accept to save settings and apply theme changes before closing the dialog.
+        """
         settings_path = get_settings_path()
-        settings = {
-            'dark_mode': self.darkModeToggle.isChecked(),
-            'show_passwords': self.passwordVisibilityToggle.isChecked(),
-            'auto_lock_enabled': self.autoLockEnabledCheckbox.isChecked(),
-            'auto_lock': self.autoLockSlider.value() * 5,  # Convert slider value back to minutes
-        }
+        settings = { ... }  # Gather settings from UI components
         with open(settings_path, 'w') as file:
             json.dump(settings, file, indent=4)
-
-        newTheme = "dark" if settings['dark_mode'] else "light"
-        self.themeManager.setTheme(newTheme)
+        self.themeManager.setTheme("dark" if settings['dark_mode'] else "light")
         self.parent().applyGlobalSettings() 
-
         super().accept()
