@@ -32,18 +32,24 @@ class PasswordGenerator:
             characters += string.ascii_uppercase
         
         password_parts = []
-        
+
+        # Select unique digits if required
         if num_digits > 0:
-            password_parts += random.choices(string.digits, k=num_digits)
-            characters += string.digits
-        
+            digits = random.sample(string.digits, k=min(num_digits, len(string.digits)))
+            password_parts.extend(digits)
+
+        # Select unique special characters if required
         if num_specials > 0:
             specials = "!@#$%^&*(),.?\":{}|<>"
-            password_parts += random.choices(specials, k=num_specials)
-            characters += specials
-        
+            specials_selected = random.sample(specials, k=min(num_specials, len(specials)))
+            password_parts.extend(specials_selected)
+
+        # Ensure the remainder of the password doesn't inadvertently increase the count of digits/specials
+        remaining_characters = [char for char in characters if char not in string.digits and char not in specials]
         remaining_length = length - len(password_parts)
-        password_parts += random.choices(characters, k=remaining_length)
+        remaining_parts = random.choices(remaining_characters, k=remaining_length)
+
+        password_parts.extend(remaining_parts)
         random.shuffle(password_parts)
         
         return ''.join(password_parts)

@@ -126,7 +126,25 @@ class Database:
         if result:
             return bool(result[0])
         return False
+        
+    def fetch_favourites(self, encryption_key):
+        """
+        Fetches all entries marked as favourites from the vault.
 
+        This method retrieves all entries from the database where the 'favourite' column is set to 1 (true),
+        indicating they are marked as favourites. The retrieved entries are then decrypted using the provided
+        encryption key before being returned.
+
+        Args:
+            encryption_key (bytes): The encryption key used for decrypting the entries.
+
+        Returns:
+            list of tuple: A list of decrypted entries that are marked as favourites.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM vault WHERE favourite = 1;")
+        encrypted_entries = cursor.fetchall()
+        return self.decrypt_entries(encrypted_entries, encryption_key)
     
     def wipe_database(self):
         """Delete all entries from the vault."""
