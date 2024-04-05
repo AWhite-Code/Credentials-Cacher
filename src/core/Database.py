@@ -111,19 +111,22 @@ class Database:
         
         
     def toggle_favourite_status(self, entry_id, new_status):
-        """Toggle the 'favourite' status of a vault entry."""
+        """Sets the current favourite value to the opposite"""
+        new_status_int = 1 if new_status else 0
+        
         cursor = self.connection.cursor()
-        cursor.execute("UPDATE vault SET favourite = ? WHERE id = ?", (new_status, entry_id))
+        cursor.execute("UPDATE vault SET favourite = ? WHERE id = ?", (new_status_int, entry_id))
         self.connection.commit()
                     
-    def fetch_favourites(self, encryption_key):
-        """Fetch all entries marked as 'favourite', decrypting them with the given encryption key."""
+    def fetch_favourite_status(self, entry_id):
+        """Fetches the favourite status of an entry by ID."""
         cursor = self.connection.cursor()
-        query = "SELECT id, website_name, website_url, username, password, notes, favourite, created_at, updated_at FROM vault WHERE favourite = 1;"
-        cursor.execute(query)
-        encrypted_entries = cursor.fetchall()
-        
-        return self.decrypt_entries(encrypted_entries, encryption_key)
+        cursor.execute("SELECT favourite FROM vault WHERE id = ?", (entry_id,))
+        result = cursor.fetchone()
+        if result:
+            return bool(result[0])
+        return False
+
     
     def wipe_database(self):
         """Delete all entries from the vault."""

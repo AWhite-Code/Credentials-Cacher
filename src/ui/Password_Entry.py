@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QLabel
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QPixmap, QCursor
+import os
 
 class PasswordEntryButton(QWidget):
     """
@@ -104,7 +105,7 @@ class PasswordEntryButton(QWidget):
         """
         Updates the visibility of icons based on selection state and applies custom styling.
 
-        Args:
+        Args:pass
             isSelected (bool): Indicates if the entry is selected.
         """
         self.editIcon.setVisible(isSelected)
@@ -127,24 +128,33 @@ class PasswordEntryButton(QWidget):
         Args:
             themeName (str): The name of the current theme ('light' or 'dark') which determines the icon set to use.
         """
-        # Define the scale factor and calculate the icon size based on the button's height.
+        # Determine the base path for resources relative to this file's location.
+        basePath = os.path.dirname(os.path.abspath(__file__))
+        resourcesPath = os.path.abspath(os.path.join(basePath, '..', '..', 'resources', 'icons'))
+
+        # Define the scale factor and calculate the icon size.
         scaleFactor = 0.5
         iconSize = QSize(int(self.button.sizeHint().height() * scaleFactor),
                         int(self.button.sizeHint().height() * scaleFactor))
 
-        # Set the path and update the pixmap for the edit icon based on the theme.
-        editIconPath = '../../resources/icons/edit.png' if themeName == 'light' else '../../resources/icons/edit_white.png'
-        editPixmap = QPixmap(editIconPath).scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.editIcon.setPixmap(editPixmap)
+        # Helper function to load an icon with logging for debugging.
+        def loadIcon(iconName):
+            iconPath = os.path.join(resourcesPath, iconName)
+            pixmap = QPixmap(iconPath).scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            if pixmap.isNull():
+                print(f"Failed to load icon: {iconPath}")
+            return pixmap
 
-        # Set the path and update the pixmap for the delete icon based on the theme.
-        deleteIconPath = '../../resources/icons/delete.png' if themeName == 'light' else '../../resources/icons/delete_white.png'
-        deletePixmap = QPixmap(deleteIconPath).scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.deleteIcon.setPixmap(deletePixmap)
+        # Update the edit icon.
+        editIconName = 'edit.png' if themeName == 'light' else 'edit_white.png'
+        self.editIcon.setPixmap(loadIcon(editIconName))
 
-        # Determine the favourite icon path based on the favourite status and theme.
-        isFavourite = self.entry_data[6] == 1
-        favIconPath = ('../../resources/icons/heart_favourited.png' if isFavourite else '../../resources/icons/heart_empty.png') if themeName == 'light' \
-                    else ('../../resources/icons/heart_favourited_white.png' if isFavourite else '../../resources/icons/heart_empty_white.png')
-        favIconPixmap = QPixmap(favIconPath).scaled(iconSize, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.favouriteIcon.setPixmap(favIconPixmap)
+        # Update the delete icon.
+        deleteIconName = 'delete.png' if themeName == 'light' else 'delete_white.png'
+        self.deleteIcon.setPixmap(loadIcon(deleteIconName))
+
+        # Update the favourite icon based on the favourite status and theme.
+        favIconFile = 'heart_favourited.png' if self.entry_data[6] == 1 else 'heart_empty.png'
+        favIconFileWhite = 'heart_favourited.png' if self.entry_data[6] == 1 else 'heart_empty_white.png'
+        favIconName = favIconFile if themeName == 'light' else favIconFileWhite
+        self.favouriteIcon.setPixmap(loadIcon(favIconName))

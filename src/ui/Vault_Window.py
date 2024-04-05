@@ -498,11 +498,18 @@ class VaultWidget(QWidget):
         # Switch to the add/edit form view
         self.stackedWidget.setCurrentIndex(1)
         
-    def handleToggleFavourite(self, entry_id, current_status):
-        self.mainWindow.resetAutoLockTimer()
-        new_status = not current_status
+    def handleToggleFavourite(self, entry_id, _):
+        # Fetch current status directly from the database
+        current_status = self.db.fetch_favourite_status(entry_id)
+        new_status = not current_status  # Toggle the status
+        
+        # Log the operation for debugging
+        print(f"Toggling favourite for entry ID {entry_id}: {current_status} -> {new_status}")
+        
+        # Update the database with the new status
         self.db.toggle_favourite_status(entry_id, new_status)
-        # Use the currently selected entry's ID to refresh and reselect the entry
+        
+        # Refresh the UI to reflect the change
         self.populate_vault(reselect_entry_id=entry_id)
 
     def changeMode(self, mode):

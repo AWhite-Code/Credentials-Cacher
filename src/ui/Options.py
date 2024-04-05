@@ -70,10 +70,8 @@ class OptionsDialog(QDialog):
         self.layout.addWidget(self.okButton)
         self.layout.addWidget(self.cancelButton)
 
+    # Inside OptionsDialog class
     def loadSettings(self):
-        """
-        Loads settings from a JSON file and applies them to the UI components.
-        """
         settings_path = get_settings_path()
         try:
             with open(settings_path, 'r') as file:
@@ -81,9 +79,16 @@ class OptionsDialog(QDialog):
                 self.darkModeToggle.setChecked(settings.get('dark_mode', False))
                 self.passwordVisibilityToggle.setChecked(settings.get('show_passwords', False))
                 self.autoLockEnabledCheckbox.setChecked(settings.get('auto_lock_enabled', True))
-                self.autoLockSlider.setValue(settings.get('auto_lock', 1) // 5)
+
+                auto_lock_minutes = settings.get('auto_lock', 5)
+                slider_position = auto_lock_minutes // 5
+                slider_position = max(min(slider_position, self.autoLockSlider.maximum()), self.autoLockSlider.minimum())
+                self.autoLockSlider.setValue(slider_position)
+                self.autoLockLabel.setText(f"Auto-lock timer (minutes): {auto_lock_minutes}")
         except FileNotFoundError:
-            pass  # Proceed with default values if the settings file does not exist
+            print("Settings file not found. Loading defaults.")
+
+
 
     @staticmethod
     def load_or_create_settings():
@@ -125,17 +130,21 @@ class OptionsDialog(QDialog):
 
     def accept(self):
         settings_path = get_settings_path()
-        settings = {
+        current_settings = self.load_or_create_settings()  # Load current settings
+        
+        # Update settings with new values from UI components
+        current_settings.update({
             'dark_mode': self.darkModeToggle.isChecked(),
             'show_passwords': self.passwordVisibilityToggle.isChecked(),
             'auto_lock_enabled': self.autoLockEnabledCheckbox.isChecked(),
-            'auto_lock': self.autoLockSlider.value() * 5,  # Assuming you want to store this as minutes
-            # Add any other settings you need to save here
-        }
+            'auto_lock': self.autoLockSlider.value() * 5,
+        })
+        
+        # Save the updated settings
         with open(settings_path, 'w') as file:
-            json.dump(settings, file, indent=4)
+            json.dump(current_settings, file, indent=4)
 
-        newTheme = "dark" if settings['dark_mode'] else "light"
+        newTheme = "dark" if current_settings['dark_mode'] else "light"
         self.themeManager.setTheme(newTheme)
         self.parent().applyGlobalSettings() 
 

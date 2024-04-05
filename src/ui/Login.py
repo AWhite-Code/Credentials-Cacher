@@ -216,33 +216,57 @@ class LoginWidget(QWidget):
 
     def load_settings(self):
         """
-        Loads user preferences from the settings file, applying any remembered username.
+        Loads user preferences from the settings file, applying any remembered username and the remember_me state.
         """
         settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
 
         try:
             with open(settings_path, 'r') as file:
                 settings = json.load(file)
-                if settings.get('remember_me', False):
-                    credentials_path = os.path.join(settings_path, '..', 'credentials.bin')
+                
+                # Check and apply the remember_me setting
+                remember_me = settings.get('remember_me', False)
+                self.remember_me_checkbox.setChecked(remember_me)
+                
+                if remember_me:
+                    credentials_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'credentials.bin')
                     with open(credentials_path, 'rb') as cred_file:
                         credentials = pickle.load(cred_file)
-                        self.username_entry.setText(credentials['username'])
+                        self.username_entry.setText(credentials.get('username', ''))
+                        # If you also want to autofill the password (not recommended for security reasons), you can do it here.
         except FileNotFoundError:
-            pass  # Settings file doesn't exist; proceed with defaults.
+            # Settings file doesn't exist; proceed with defaults.
+            pass
         except json.JSONDecodeError:
             print("Error reading settings file. It may be empty or corrupted.")
 
     def save_settings(self):
         """
-        Saves the 'remember_me' preference to the settings file.
+        Saves the 'remember_me' preference to a JSON settings file.
+        
+        This method checks if the settings file exists, loads current settings if so, and updates 
+        or adds the 'remember_me' preference based on the state of the associated checkbox in the UI.
+        If the file doesn't exist, it creates a new settings dictionary and adds the 'remember_me' preference.
+        The updated settings are then written back to the file.
         """
+        # Construct the file path for the settings JSON in the user's AppData directory.
         settings_path = os.path.join(os.getenv('APPDATA'), 'Credentials Cacher', 'settings.json')
         try:
-            settings = {'remember_me': self.remember_me_checkbox.isChecked()}
+            # Load existing settings if available; otherwise, start with an empty dict.
+            if os.path.exists(settings_path):
+                with open(settings_path, 'r') as file:
+                    settings = json.load(file)
+            else:
+                settings = {}
+            
+            # Update 'remember_me' preference based on the checkbox state.
+            settings['remember_me'] = self.remember_me_checkbox.isChecked()
+
+            # Write the updated settings back to the settings file.
             with open(settings_path, 'w') as file:
                 json.dump(settings, file, indent=4)
         except Exception as e:
+            # Log any errors encountered during the process.
             print(f"Error saving settings: {e}")
 
     def resizeEvent(self, event):
