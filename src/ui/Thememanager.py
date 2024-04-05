@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 import json
+import os
 from core.utils import get_settings_path
 
 class ThemeManager(QObject):
@@ -30,7 +31,9 @@ class ThemeManager(QObject):
         return self._currentTheme
 
     def applyCurrentTheme(self):
-        themePath = f"{self._currentTheme}_theme.qss"
+        # Adjust the path for the .qss file based on the current directory
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))  # Go up three levels from this file
+        themePath = os.path.join(base_dir, f"resources/styles/{self._currentTheme}_theme.qss")
         try:
             with open(themePath, "r") as file:
                 self._application.setStyleSheet(file.read())

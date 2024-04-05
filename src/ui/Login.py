@@ -25,7 +25,7 @@ class LoginWidget(QWidget):
         base_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory where the script is located
         resources_dir = os.path.join(os.path.dirname(os.path.dirname(base_dir)), 'resources', 'icons')  # Navigate up to the root and then to /resources/icons
         
-        logo_filename = "logo_white.svg" if not dark_mode_enabled else "logo.svg"
+        logo_filename = "logo.svg" if not dark_mode_enabled else "logo_white.svg"
         logo_path = os.path.join(resources_dir, logo_filename)
 
         central_column_layout = QVBoxLayout()

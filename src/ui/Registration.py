@@ -35,7 +35,7 @@ class RegistrationWidget(QWidget):
         base_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory where the script is located
         resources_dir = os.path.join(os.path.dirname(os.path.dirname(base_dir)), 'resources', 'icons')  # Navigate up to the root and then to /resources/icons
         
-        logo_filename = "logo_white.svg" if not dark_mode_enabled else "logo.svg"
+        logo_filename = "logo.svg" if not dark_mode_enabled else "logo_white.svg"
         logo_path = os.path.join(resources_dir, logo_filename)
         
         self.logoContainer = QSvgWidget(logo_path, self)
@@ -135,7 +135,7 @@ class RegistrationWidget(QWidget):
         open('credentials.bin', 'wb').close()
 
     def validate_password(self, password):
-        if len(password) < 8 or not re.search("[0-9]", password) or not re.search("[!@#$%^&*(),.?\":{}|<>]", password):
+        if len(password) < 20 or not re.search("[0-9]", password) or not re.search("[!@#$%^&*(),.?\":{}|<>]", password):
             return False
         return True
 
