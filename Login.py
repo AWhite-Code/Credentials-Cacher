@@ -1,10 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QLineEdit, QPushButton, QCheckBox, QFrame, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QLineEdit, QPushButton, QCheckBox, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
 import pickle
 from Hashing import Hashing
 from Encryption import Encryption
-from ClickableLineEdit import ClickableLineEdit
 import os
 import json
 

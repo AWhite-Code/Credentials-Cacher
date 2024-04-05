@@ -1,7 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QCheckBox, QSlider, QLabel, QPushButton, QHBoxLayout
 import json
-from PyQt5.QtCore import QSettings
 from utils import get_settings_path
 import os
 

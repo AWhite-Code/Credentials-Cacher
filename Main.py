@@ -2,12 +2,11 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 from Window import MainWindow
 from Database import Database
-from Thememanager import ThemeManager  # Assuming you have a ThemeManager class defined
+from Thememanager import ThemeManager
 from Options import OptionsDialog
 import logging
 import sys
 import os
-import json
 
 def get_settings_path():
     app_data_path = os.getenv('APPDATA')

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QFrame, QSlider, QCheckBox, QDialog, QApplication
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QSlider, QCheckBox, QDialog
 )
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
 from Password_Entry import PasswordEntryButton
 from Password_Generator import PasswordGenerator
@@ -12,13 +12,16 @@ from ClickableLineEdit import ClickableLineEdit
 
 
 class VaultWidget(QWidget):
+    VAULT_VIEW_INDEX = 0
+    ADD_PASSWORD_FORM_INDEX = 1
+    PASSWORD_GENERATOR_FORM_INDEX = 2
     def __init__(self, db, settings, themeManager, mainWindow, parent=None):
         super().__init__(parent)
         self.db = db
         self.settings = settings
         self.themeManager = themeManager
         self.mainWindow = mainWindow
-        self.selectedButton = None  # Track the selected button
+        self.selectedButton = None  # Track the selected button in the Vault GUI
         self.encryption_key = None
         self.currentMode = 'all'  # Default mode
         self.current_edit_id = None  # None indicates "add mode"
@@ -35,7 +38,11 @@ class VaultWidget(QWidget):
         # Setup sublayouts
         self.setupTopBar()
         self.setupMainContent()
-        self.stackedWidget.setCurrentIndex(0)
+        # Initialize and add the Add Password Form and Password Generator Form to stackedWidget
+        self.init_add_password_form()
+        self.init_password_generator_form()
+        # Ensure the vault view is the initial view
+        self.stackedWidget.setCurrentIndex(self.VAULT_VIEW_INDEX)
         self.applyPasswordVisibility()
 
     def setupTopBar(self):
@@ -132,9 +139,6 @@ class VaultWidget(QWidget):
         self.stackedWidget.addWidget(passwordDisplayArea)
 
         # Call init_add_password_form to setup and add the Add Password Form as the second view
-        self.init_add_password_form()
-        
-        self.init_password_generator_form()
 
         # Ensure the vault view is the initial view
         self.stackedWidget.setCurrentIndex(0)
@@ -220,11 +224,9 @@ class VaultWidget(QWidget):
         self.addPasswordFormWidget = QWidget()
         # Create a QVBoxLayout for the form widget
         verticalLayout = QVBoxLayout(self.addPasswordFormWidget)
-        
         # Create a spacer item with a small height (e.g., 10 pixels) and add it to the vertical layout
         spacer = QSpacerItem(20, 150, QSizePolicy.Minimum, QSizePolicy.Fixed)
         verticalLayout.addSpacerItem(spacer)
-        
         # Now create the form layout and add your form fields to this layout
         formLayout = QFormLayout()
         # Initialize form fields...
@@ -235,7 +237,6 @@ class VaultWidget(QWidget):
         self.notes_entry = QLineEdit()
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit_password_details)
-
         # Add widgets to the form layout
         formLayout.addRow("Website Name", self.website_name_entry)
         formLayout.addRow("Website URL", self.website_url_entry)
@@ -243,19 +244,11 @@ class VaultWidget(QWidget):
         formLayout.addRow("Password", self.password_entry)
         formLayout.addRow("Notes", self.notes_entry)
         formLayout.addRow(self.submit_button)
-        
         # Add the form layout to the vertical layout
         verticalLayout.addLayout(formLayout)
-
-        # Adjust the spacing of the form layout if needed
-        formLayout.setSpacing(50)
-
         # Add the form widget to the stackedWidget
-        
-        self.passwordLineEdit = QLineEdit()
-        password_echo_mode = QLineEdit.EchoMode.Normal if self.settings.get('show_passwords', False) else QLineEdit.EchoMode.Password
-        self.passwordLineEdit.setEchoMode(password_echo_mode)
-        
+        self.stackedWidget.addWidget(self.addPasswordFormWidget)
+            
 
     def toggle_add_password_form(self):
         # Define index constants for readability
@@ -270,8 +263,8 @@ class VaultWidget(QWidget):
             self.current_edit_id = None  # Reset to ensure we're in "add mode"
             
     def init_password_generator_form(self):
-        self.passwordGeneratorFormWidget = QWidget()
-        generatorLayout = QVBoxLayout(self.passwordGeneratorFormWidget)
+        self.passwordGeneratorFormWidget = QWidget()  # Ensure this is a QWidget
+        generatorLayout = QVBoxLayout()  # Create the layout without passing the widget
 
         # Initialize UI components as before
         self.generatedPasswordDisplay = QLineEdit()
@@ -328,7 +321,10 @@ class VaultWidget(QWidget):
         self.specialCharsCountEdit.textChanged.connect(self.saveSettingsOnChange)
         self.lengthSlider.valueChanged.connect(self.saveSettingsOnChange)
 
-        # Finally, add the form widget to the stacked widget
+        # Then set the layout on the widget
+        self.passwordGeneratorFormWidget.setLayout(generatorLayout)
+
+        # Finally, add the widget to the stackedWidget
         self.stackedWidget.addWidget(self.passwordGeneratorFormWidget)
 
     def update_slider_value_label(self):
@@ -614,4 +610,8 @@ class VaultWidget(QWidget):
         # Assuming settings are loaded from a shared settings manager or utility
         self.settings = OptionsDialog.load_or_create_settings()  # Adjust this line accordingly
         self.applyPasswordVisibility()
+        
+    def showAddPasswordForm(self):
+        # Set the current index to show the add password form
+        self.stackedWidget.setCurrentIndex(self.ADD_PASSWORD_FORM_INDEX)
 

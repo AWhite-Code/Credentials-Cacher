@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QLineEdit
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 
 class ClickableLineEdit(QLineEdit):
     # Signal to indicate the field was clicked. You might not need this if toggling is fully managed by global settings.
