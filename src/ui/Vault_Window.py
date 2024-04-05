@@ -162,7 +162,7 @@ class VaultWidget(QWidget):
         nameRowLayout = QHBoxLayout()
         nameLabel = QLabel("Name:")
         self.nameLineEdit = QLineEdit()
-        self.nameLineEdit.setMaximumWidth(160)
+        self.nameLineEdit.setMaximumWidth(80)
         self.nameLineEdit.setReadOnly(True)
         nameRowLayout.addWidget(nameLabel)
         nameRowLayout.addWidget(self.nameLineEdit)
@@ -171,7 +171,7 @@ class VaultWidget(QWidget):
         usernameRowLayout = QHBoxLayout()
         usernameLabel = QLabel("Username:")
         self.usernameLineEdit = QLineEdit()
-        self.usernameLineEdit.setMaximumWidth(300)
+        self.usernameLineEdit.setMaximumWidth(80)
         self.usernameLineEdit.setReadOnly(True)
         usernameRowLayout.addWidget(usernameLabel)
         usernameRowLayout.addWidget(self.usernameLineEdit)
@@ -182,7 +182,7 @@ class VaultWidget(QWidget):
         
         # Use ClickableLineEdit for the password field
         self.passwordLineEdit = ClickableLineEdit()  # Replace QLineEdit with ClickableLineEdit
-        self.passwordLineEdit.setMaximumWidth(190)
+        self.passwordLineEdit.setMaximumWidth(80)
         self.passwordLineEdit.setReadOnly(True)  # It starts as read-only, clicking will toggle visibility
         # Apply global visibility setting from the start
         self.applyPasswordVisibility()  # Make sure this is defined and updates the visibility based on global settings
@@ -194,7 +194,7 @@ class VaultWidget(QWidget):
         sitenameRowLayout = QHBoxLayout()
         sitenameLabel = QLabel("Website:")
         self.sitenameLineEdit = QLineEdit()
-        self.sitenameLineEdit.setMaximumWidth(160)
+        self.sitenameLineEdit.setMaximumWidth(80)
         self.sitenameLineEdit.setReadOnly(True)
         sitenameRowLayout.addWidget(sitenameLabel)
         sitenameRowLayout.addWidget(self.sitenameLineEdit)
