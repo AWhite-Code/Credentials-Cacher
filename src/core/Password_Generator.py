@@ -40,13 +40,17 @@ class PasswordGenerator:
 
         # Select unique special characters if required
         if num_specials > 0:
-            specials = "!@#$%^&*(),.?\":{}|<>"
+            specials = "!@#$%^&*()?\:|<>"
             specials_selected = random.sample(specials, k=min(num_specials, len(specials)))
             password_parts.extend(specials_selected)
 
         # Ensure the remainder of the password doesn't inadvertently increase the count of digits/specials
-        remaining_characters = [char for char in characters if char not in string.digits and char not in specials]  # Get a list of only lower and uppercase characters
-                                                                                                                    # Maybe break this down into 3 lines later for maintainability
+        remaining_characters = []
+        for char in characters:
+            if char not in string.digits and char not in specials:      # Create a list of only upper and lower case characters
+                remaining_characters.append(char)
+                
+
         remaining_length = length - len(password_parts)
         remaining_parts = random.choices(remaining_characters, k=remaining_length)
 
