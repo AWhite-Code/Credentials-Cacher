@@ -1,4 +1,4 @@
-from Database import Database
+from ..src.core.Database import Database
 
 def wipe_database():
     print("I have been called!")

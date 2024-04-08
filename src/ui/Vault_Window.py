@@ -213,7 +213,7 @@ class VaultWidget(QWidget):
         """
         self.rightColumnLayout = QVBoxLayout()
         self.rightColumnLayout.setSpacing(25)
-        self.rightColumnLayout.setContentsMargins(10, 10, 10, 10)
+        self.rightColumnLayout.setContentsMargins(5, 10, 5, 10)
 
         # Initialize detail QLineEdit widgets here
         self.nameLineEdit = QLineEdit()
@@ -231,10 +231,10 @@ class VaultWidget(QWidget):
         self.applyPasswordVisibility()  # Assuming this method correctly applies the visibility state
 
         # Create row layouts for each detail
-        nameRowLayout = self.createDetailRow("Name:", self.nameLineEdit, 80)
-        usernameRowLayout = self.createDetailRow("Username:", self.usernameLineEdit, 80)
-        passwordRowLayout = self.createDetailRow("Password:", self.passwordLineEdit, 80, isClickable=True)
-        sitenameRowLayout = self.createDetailRow("Website:", self.sitenameLineEdit, 80)
+        nameRowLayout = self.createDetailRow("Name:", self.nameLineEdit, 125)
+        usernameRowLayout = self.createDetailRow("Username:", self.usernameLineEdit, 125)
+        passwordRowLayout = self.createDetailRow("Password:", self.passwordLineEdit, 125, isClickable=True)
+        sitenameRowLayout = self.createDetailRow("Website:", self.sitenameLineEdit, 125)
         self.lastUpdatedLabel = QLabel("Last Updated: Not available")
 
         # Setup Notes section
@@ -567,7 +567,6 @@ class VaultWidget(QWidget):
         """
         self.mainWindow.resetAutoLockTimer()
         search_query = self.searchLineEdit.text().lower()
-        # Assuming fetch_all_entries method exists and returns decrypted entries
         all_entries = self.db.fetch_all_entries(self.encryption_key)
         filtered_entries = [entry for entry in all_entries if search_query in entry[1].lower()]
         self.populate_vault(filtered_entries)
@@ -615,7 +614,7 @@ class VaultWidget(QWidget):
         self.adjustButtonWidth()  # Adjust button widths based on the new size.
         super().resizeEvent(event)  # Call the parent class's resize event handler.
 
-    def delete_Entry(self, entry_id):
+    def delete_entry(self, entry_id):
         """
         Deletes a password entry from the database and refreshes the vault view.
 
