@@ -45,7 +45,8 @@ class PasswordGenerator:
             password_parts.extend(specials_selected)
 
         # Ensure the remainder of the password doesn't inadvertently increase the count of digits/specials
-        remaining_characters = [char for char in characters if char not in string.digits and char not in specials]
+        remaining_characters = [char for char in characters if char not in string.digits and char not in specials]  # Get a list of only lower and uppercase characters
+                                                                                                                    # Maybe break this down into 3 lines later for maintainability
         remaining_length = length - len(password_parts)
         remaining_parts = random.choices(remaining_characters, k=remaining_length)
 
