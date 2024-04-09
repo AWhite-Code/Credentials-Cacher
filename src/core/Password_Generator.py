@@ -40,7 +40,7 @@ class PasswordGenerator:
 
         # Select unique special characters if required
         if num_specials > 0:
-            specials = "!@#$%^&*()?\:|<>"
+            specials = "!@#$%^&*()?\:|<>"   # Add ability to remove characters that might break SQL such as <> in later versions            
             specials_selected = random.sample(specials, k=min(num_specials, len(specials)))
             password_parts.extend(specials_selected)
 
@@ -50,7 +50,6 @@ class PasswordGenerator:
             if char not in string.digits and char not in specials:      # Create a list of only upper and lower case characters
                 remaining_characters.append(char)
                 
-
         remaining_length = length - len(password_parts)
         remaining_parts = random.choices(remaining_characters, k=remaining_length)
 
