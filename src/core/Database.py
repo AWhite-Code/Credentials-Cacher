@@ -58,8 +58,11 @@ class Database:
         self.connection.commit()
 
     def delete_password_entry(self, entry_id):
-        """Delete a vault entry by its unique identifier."""
+        print(f"Attempting to delete entry with ID: {entry_id}, type: {type(entry_id)}")
         cursor = self.connection.cursor()
+        if isinstance(entry_id, tuple):
+            # If entry_id is a tuple, extract the first element assuming it's the correct ID.
+            entry_id = entry_id[0]
         cursor.execute("DELETE FROM vault WHERE id = ?", (entry_id,))
         self.connection.commit()
 

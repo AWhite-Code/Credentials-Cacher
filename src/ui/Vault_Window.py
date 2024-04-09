@@ -548,7 +548,7 @@ class VaultWidget(QWidget):
             button = PasswordEntryButton(entry, self.themeManager)
             button.displayDetails.connect(lambda entry_data=entry, button=button: self.display_entry_details(entry_data, button))
             button.editClicked.connect(lambda entry_data=entry: self.enter_edit_mode(entry_data))
-            button.deleteClicked.connect(lambda: self.delete_entry(entry[0]))
+            button.deleteClicked.connect(lambda entry_data=entry: self.delete_entry(entry_data[0]))
             button.toggleFavourite.connect(self.handle_toggle_favourite)
             self.scrollContentLayout.addWidget(button)
 

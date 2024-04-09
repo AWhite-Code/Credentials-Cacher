@@ -158,6 +158,7 @@ class LoginWidget(QWidget):
         password = self.password_entry.text().strip()
 
         if self.validate_login(username, password):
+            self.main_window.resetAutoLockTimer()
             global_salt = self.get_global_salt()
             encryption_key = Encryption.derive_key(password.encode(), global_salt)
             self.main_window.set_encryption_key(encryption_key)
