@@ -26,6 +26,10 @@ class Encryption:
         """
         Encrypt the provided data using AES-256 GCM mode.
         """
+        # Check if data is None and raise ValueError
+        if data is None:
+            raise ValueError("Data to encrypt cannot be None")
+
         salt = get_random_bytes(16)  # Not used in GCM mode, but included for completeness.
         nonce = get_random_bytes(16)
         cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
@@ -36,7 +40,6 @@ class Encryption:
             'nonce': base64.b64encode(nonce).decode('utf-8'),
             'tag': base64.b64encode(tag).decode('utf-8'),
         })
-        #logging.debug(f"Serialized encrypted data: {encrypted_data}")
         return encrypted_data
 
     @staticmethod

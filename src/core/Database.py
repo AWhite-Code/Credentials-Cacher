@@ -68,21 +68,26 @@ class Database:
 
     def add_password_entry(self, website_name, website_url, username, password, notes, encryption_key):
         """Add a new vault entry, encrypting the data with the provided encryption key."""
-        encrypted_website_name = Encryption.encrypt_data(website_name, encryption_key)
-        encrypted_website_url = Encryption.encrypt_data(website_url, encryption_key) if website_url else None
-        encrypted_username = Encryption.encrypt_data(username, encryption_key)
-        encrypted_password = Encryption.encrypt_data(password, encryption_key)
-        encrypted_notes = Encryption.encrypt_data(notes, encryption_key) if notes else None
-        
+        # Check for None values in mandatory fields
+        if website_name is None or username is None or password is None:
+            raise ValueError("Website name, username, and password cannot be None")
+
+        # Directly encrypt data, using ternary conditional expressions to handle None values
+        encrypted_website_name = Encryption.encrypt_data(website_name, encryption_key) if website_name is not None else None
+        encrypted_website_url = Encryption.encrypt_data(website_url, encryption_key) if website_url is not None else None
+        encrypted_username = Encryption.encrypt_data(username, encryption_key) if username is not None else None
+        encrypted_password = Encryption.encrypt_data(password, encryption_key) if password is not None else None
+        encrypted_notes = Encryption.encrypt_data(notes, encryption_key) if notes is not None else None
+
         cursor = self.connection.cursor()
         query = """INSERT INTO vault (website_name, website_url, username, password, notes)
-                   VALUES (?, ?, ?, ?, ?);"""
+                VALUES (?, ?, ?, ?, ?);"""
         cursor.execute(query, (
-            encrypted_website_name or '',
-            encrypted_website_url or '',
-            encrypted_username or '',
-            encrypted_password or '',
-            encrypted_notes or ''))
+            encrypted_website_name,
+            encrypted_website_url,
+            encrypted_username,
+            encrypted_password,
+            encrypted_notes))
         self.connection.commit()
             
     def fetch_all_entries(self, encryption_key):
