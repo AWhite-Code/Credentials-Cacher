@@ -11,3 +11,4 @@ app.log
 # Directories
 .pytest_cache
 .vscode
+report.html
