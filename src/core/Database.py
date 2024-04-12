@@ -30,11 +30,6 @@ class Database:
             with open(self.salt_path, 'wb') as f:
                 f.write(salt)
 
-    def get_global_salt(self):
-        """Retrieve the global salt from the file system."""
-        with open(self.salt_path, 'rb') as f:
-            return f.read()
-
     def connect_to_db(self):
         """Establish a SQLite database connection."""
         return sqlite3.connect(self.db_path)

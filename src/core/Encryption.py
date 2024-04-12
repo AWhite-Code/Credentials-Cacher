@@ -30,7 +30,6 @@ class Encryption:
         if data is None:
             raise ValueError("Data to encrypt cannot be None")
 
-        salt = get_random_bytes(16)  # Not used in GCM mode, but included for completeness.
         nonce = get_random_bytes(16)
         cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
         ciphertext, tag = cipher.encrypt_and_digest(data.encode())

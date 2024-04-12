@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QSlider, QCheckBox, QDialog
+    QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QFormLayout, QSpacerItem, QSizePolicy, QStackedWidget, QTextEdit, QSlider, QCheckBox, QDialog, QMessageBox
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator  # Correct import for QIntValidator
@@ -471,6 +471,20 @@ class VaultWidget(QWidget):
         password = self.password_entry.text()
         notes = self.notes_entry.text()
 
+        # Check mandatory fields
+        missing_fields = []
+        if not website_name:
+            missing_fields.append("Website Name")
+        if not username:
+            missing_fields.append("Username")
+        if not password:
+            missing_fields.append("Password")
+
+        if missing_fields:
+            error_message = f"Please fill in the following mandatory fields: {', '.join(missing_fields)}"
+            QMessageBox.warning(self, "Missing Data", error_message)
+            return  # Stop further processing
+
         # Ensure that the encryption key is available before proceeding
         if self.encryption_key is not None:
             try:
@@ -489,13 +503,14 @@ class VaultWidget(QWidget):
                 self.stackedWidget.setCurrentIndex(0)  # Assumes the vault view is at index 0
             except Exception as e:
                 # Log the error or inform the user about the failure
-                print(f"Failed to process entry: {e}")
+                QMessageBox.critical(self, "Error", f"Failed to process entry: {e}")
         else:
             # Handle the scenario where the encryption key is not available
-            print("Encryption key is not available. Cannot process the entry.")
+            QMessageBox.warning(self, "Encryption Key Missing", "Encryption key is not available. Cannot process the entry.")
 
         # Reset the current_edit_id to None to ensure the form is back in "add mode"
         self.current_edit_id = None
+
 
 
     def clear_form_fields(self):
