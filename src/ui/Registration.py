@@ -195,7 +195,7 @@ class RegistrationWidget(QWidget):
 
     def validate_password(self, password):
         """Validates the password against the set requirements."""
-        if len(password) < 8 or not re.search("[0-9]", password) or not re.search("[!@#$%^&*(),.?\":{}|<>]", password):
+        if len(password) < 20 or not re.search("[0-9]", password) or not re.search("[!@#$%^&*(),.?\":{}|<>]", password):
             return False
         return True
     
